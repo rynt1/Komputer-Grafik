@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pertemuan 2 - Titik dan Palet Warna (Elegant UI)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+  :root {
+    --color-bg: #ffffff;
+    --color-text-base: #1a1818;
+    --color-text-muted: #262629;
+    --color-primary: #1a1b1b;
+    --color-primary-hover: #1f2937;
+    --color-card-bg: #d4bbbb;
+    --color-border: #414141;
+    --color-shadow: rgba(0,0,0,0.06);
+    --font-family-base: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --radius-base: 0.75rem;
+    --transition-fast: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-family-base);
+    background: linear-gradient(135deg, #6b8e9e 0%, #cfc7b7 60%, #6b6450 100%);
+    color: var(--color-text-base);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 16px;
+    min-height: 100vh;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  a:hover,
+  a:focus {
+    color: var(--color-primary-hover);
+    outline: none;
+  }
+
+  main.container {
+    max-width: 1200px;
+    margin: 4rem auto 5rem;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  h1.page-title {
+    font-weight: 800;
+    font-size: 48px;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+
+  .top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(320px, 1fr));
+    gap: 2.5rem 2.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 960px) {
+    .top-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+  }
+  @media (max-width: 640px) {
+    .top-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .card {
+    background: var(--color-card-bg);
+    border-radius: var(--radius-base);
+    box-shadow: 0 6px 16px var(--color-shadow);
+    padding: 1.75rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition: box-shadow var(--transition-fast);
+  }
+  .card:hover, .card:focus-within {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .card h2 {
+    margin: 0 0 1rem 0;
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    letter-spacing: -0.015em;
+  }
+
+  label {
+    font-weight: 600;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  /* Redesigned input color RGB section per Default Design Guidelines */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .input-group > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  input[type="number"] {
+    font-size: 1rem;
+    padding: 0.65rem 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    color: #111827;
+    background-color: #fff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+  input[type="number"]:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+    outline: none;
+  }
+
+  button#displayColorBtn {
+    margin-top: 1.5rem;
+    background: #111827;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: var(--radius-base);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 5px 14px rgba(17,24,39,0.2);
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+    align-self: flex-start;
+  }
+  button#displayColorBtn:hover,
+  button#displayColorBtn:focus {
+    background-color: var(--color-primary-hover);
+    box-shadow: 0 9px 22px rgba(17,24,39,0.35);
+    transform: scale(1.07);
+    outline: none;
+  }
+  button#displayColorBtn:active {
+    transform: scale(0.95);
+  }
+
+  #colorPreview {
+    width: 72px;
+    height: 72px;
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-base);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.14);
+    margin-top: 0.5rem;
+    transition: background-color 0.35s ease, transform 0.35s ease;
+  }
+
+  #hsvResult {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    margin-top: 0.6rem;
+    user-select: all;
+  }
+
+  .color-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+    gap: 1.25rem;
+  }
+  .color-box {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+  }
+  .color-box:hover,
+  .color-box:focus {
+    border-color: var(--color-primary);
+    transform: scale(1.12);
+    outline: none;
+  }
+
+  #colorCanvas {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: var(--radius-base);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.12);
+    border: 2px solid var(--color-border);
+    background: white;
+  }
+
+  .explanation-text {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .explanation-text strong {
+    color: var(--color-primary);
+  }
+
+  .explanation-text pre {
+    background-color: #ece2e2;
+    border-radius: var(--radius-base);
+    padding: 1.3rem 1.75rem;
+    font-family: 'Fira Mono', monospace;
+    font-size: 1rem;
+    overflow-x: auto;
+    margin-top: 1rem;
+    color: #374151;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  #detailOutput {
+    white-space: pre-wrap;
+    font-family: 'Fira Mono', monospace;
+    background-color: #ece2e2;
+    padding: 1.3rem 1.5rem;
+    border-radius: var(--radius-base);
+    box-shadow: 0 4px 14px var(--color-shadow);
+    font-size: 1rem;
+    color: var(--color-primary);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 640px) {
+    main.container {
+      padding: 0 1.25rem;
+    }
+    .top-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    h1.page-title {
+      font-size: 36px;
+      margin-bottom: 0.75rem;
+    }
+    .card h2 {
+      font-size: 1.375rem;
+    }
+    .explanation-text {
+      font-size: 1rem;
+    }
+    .explanation-text pre, #detailOutput {
+      font-size: 0.95rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<main class="container" role="main" aria-labelledby="mainTitle">
+  <h1 id="mainTitle" class="page-title">Pertemuan 2 - Palet Warna</h1>
+
+  <section class="top-grid" aria-label="Input dan Palet Warna">
+    <article class="card" tabindex="0" aria-labelledby="inputColorTitle">
+      <h2 id="inputColorTitle">Input Warna RGB</h2>
+      <form onsubmit="event.preventDefault(); updateColor();" aria-describedby="inputHelpText">
+        <div class="input-group">
+          <div>
+            <label for="r">Merah (R)</label>
+            <input type="number" id="r" name="r" value="255" min="0" max="255" aria-required="true" />
+          </div>
+          <div>
+            <label for="g">Hijau (G)</label>
+            <input type="number" id="g" name="g" value="100" min="0" max="255" aria-required="true" />
+          </div>
+          <div>
+            <label for="b">Biru (B)</label>
+            <input type="number" id="b" name="b" value="50" min="0" max="255" aria-required="true" />
+          </div>
+        </div>
+        <button id="displayColorBtn" aria-label="Tampilkan warna" type="submit">Tampilkan Warna</button>
+      </form>
+      <div>
+        <strong>Warna Preview</strong>
+        <div id="colorPreview" role="img" aria-live="polite" aria-label="Preview warna dipilih"></div>
+      </div>
+      <div>
+        <strong>Konversi ke HSV:</strong>
+        <p id="hsvResult" aria-live="polite" aria-atomic="true">-</p>
+      </div>
+    </article>
+
+    <article class="card" tabindex="0" aria-labelledby="paletteTitle">
+      <h2 id="paletteTitle">Palet Warna</h2>
+      <div class="color-palette" id="palette" role="list" aria-label="Palet warna yang dapat dipilih"></div>
+      <p class="explanation-text" style="margin-top:1rem;">
+        Klik warna di atas untuk menampilkannya di canvas dan input RGB.
+      </p>
+    </article>
+
+    <article class="card" tabindex="0" aria-labelledby="canvasTitle">
+      <h2 id="canvasTitle">Canvas Tampilan Warna</h2>
+      <canvas id="colorCanvas" width="200" height="200" aria-label="Canvas menampilkan warna yang dipilih"></canvas>
+    </article>
+  </section>
+
+  <section class="card explanation-text" tabindex="0" aria-labelledby="explanationTitle">
+    <h2 id="explanationTitle">Penjelasan: Himpunan Warna dalam Grafik Komputer</h2>
+    <p>Warna dalam grafik komputer dapat direpresentasikan dalam berbagai model, dua yang utama adalah:</p>
+    <ul>
+      <li><strong>RGB (Red, Green, Blue)</strong>: himpunan warna aditif. Kombinasinya membentuk warna lain.</li>
+      <li><strong>HSV (Hue, Saturation, Value)</strong>: menggambarkan rona, kejenuhan, dan kecerahan.</li>
+    </ul>
+    <p>Contoh: <code>RGB(255, 0, 0) → HSV(0°, 100%, 100%) → merah murni.</code></p>
+    <pre><code>let ctx = canvas.getContext("2d");
+ctx.fillStyle = "rgb(255, 0, 0)";
+ctx.fillRect(0, 0, 200, 200);
+</code></pre>
+    <p><strong>Penjelasan kode:</strong></p>
+    <ul>
+      <li><code>let ctx = canvas.getContext("2d")</code>: Mengakses area gambar 2D dari elemen canvas.</li>
+      <li><code>ctx.fillStyle = "rgb(...)"</code>: Menentukan warna isi yang digunakan.</li>
+      <li><code>ctx.fillRect(x, y, w, h)</code>: Menggambar warna ke piksel canvas di posisi dan ukuran tertentu.</li>
+    </ul>
+  </section>
+
+  <section class="card explanation-text" tabindex="0" aria-labelledby="detailTitle">
+    <h2 id="detailTitle">Contoh Perhitungan Detail (Naratif)</h2>
+    <pre id="detailOutput" aria-live="polite" aria-atomic="true" tabindex="0">-</pre>
+  </section>
+</main>
+
+<script>
+(() => {
+  const canvas = document.getElementById("colorCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function updateColor() {
+    const rInput = document.getElementById("r");
+    const gInput = document.getElementById("g");
+    const bInput = document.getElementById("b");
+
+    let r = Number.isNaN(parseInt(rInput.value)) ? 0 : Math.min(255, Math.max(0, parseInt(rInput.value)));
+    let g = Number.isNaN(parseInt(gInput.value)) ? 0 : Math.min(255, Math.max(0, parseInt(gInput.value)));
+    let b = Number.isNaN(parseInt(bInput.value)) ? 0 : Math.min(255, Math.max(0, parseInt(bInput.value)));
+
+    rInput.value = r;
+    gInput.value = g;
+    bInput.value = b;
+
+    const color = `rgb(${r}, ${g}, ${b})`;
+    const preview = document.getElementById("colorPreview");
+    preview.style.backgroundColor = color;
+
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const [h, s, v] = rgbToHsv(r, g, b);
+    const hsvResult = document.getElementById("hsvResult");
+    hsvResult.textContent = `H: ${h}°, S: ${s}%, V: ${v}%`;
+
+    updateDetail(r, g, b, [h,s,v]);
+  }
+
+  function rgbToHsv(r, g, b) {
+    let rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
+    let max = Math.max(rNorm, gNorm, bNorm), min = Math.min(rNorm, gNorm, bNorm);
+    let h, s, v = max;
+    let d = max - min;
+    s = max === 0 ? 0 : d / max;
+
+    if (max === min) {
+      h = 0;
+    } else {
+      switch (max) {
+        case rNorm: h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0); break;
+        case gNorm: h = (bNorm - rNorm) / d + 2; break;
+        case bNorm: h = (rNorm - gNorm) / d + 4; break;
+      }
+      h /= 6;
+    }
+
+    return [Math.round((h * 360 + 360) % 360), Math.round(s * 100), Math.round(v * 100)];
+  }
+
+  function updateDetail(r, g, b, hsv) {
+    const rN = (r / 255).toFixed(2),
+          gN = (g / 255).toFixed(2),
+          bN = (b / 255).toFixed(2);
+    const max = Math.max(rN, gN, bN);
+    const min = Math.min(rN, gN, bN);
+    const delta = (max - min).toFixed(2);
+    let hueFormula = "-", hueCalc = "-";
+
+    if (delta === '0.00') {
+      hueFormula = "-";
+      hueCalc = "0";
+    } else if (rN == max) {
+      hueFormula = `(G − B) / Δ = (${gN} − ${bN}) / ${delta}`;
+      hueCalc = ((gN - bN) / delta).toFixed(4);
+    } else if (gN == max) {
+      hueFormula = `(B − R) / Δ + 2 = (${bN} − ${rN}) / ${delta} + 2`;
+      hueCalc = (((bN - rN) / delta) + 2).toFixed(4);
+    } else if (bN == max) {
+      hueFormula = `(R − G) / Δ + 4 = (${rN} − ${gN}) / ${delta} + 4`;
+      hueCalc = (((rN - gN) / delta) + 4).toFixed(4);
+    }
+
+    document.getElementById("detailOutput").textContent = 
+`Langkah 1: Normalisasi nilai RGB
+R = ${r} / 255 = ${rN}
+G = ${g} / 255 = ${gN}
+B = ${b} / 255 = ${bN}
+
+Langkah 2: Tentukan nilai maksimum & minimum
+Max = ${max}, Min = ${min}
+Δ = Max − Min = ${delta}
+Catatan: Δ (delta) adalah selisih antara nilai RGB terbesar dan terkecil. Nilai ini menentukan seberapa kuat saturasi warna, dan digunakan juga dalam perhitungan Hue.
+
+Langkah 3: Hitung Value (V)
+V = Max × 100 = ${max} × 100 = ${hsv[2]}%
+
+Langkah 4: Hitung Saturation (S)
+S = Δ / Max × 100 = ${delta} / ${max} × 100 = ${hsv[1]}%
+
+Langkah 5: Hitung Hue (H)
+Karena ${rN == max ? "R" : gN == max ? "G" : "B"} adalah nilai maksimum:
+H = ${hueFormula} × 60 = ${hueCalc} × 60 = ${hsv[0]}°
+
+Jadi hasil akhir: HSV = (${hsv[0]}°, ${hsv[1]}%, ${hsv[2]}%)
+
+Catatan tambahan:
+– Jika Hue bernilai negatif, maka ditambahkan 360 agar berada dalam rentang 0°–360°.
+– Faktor ×60 berasal dari pembagian spektrum warna menjadi 6 bagian (masing-masing 60°), yaitu:
+  R (0°), G (120°), B (240°), dan seterusnya dalam lingkaran warna HSV.
+
+Catatan Pemahaman Hue (H):
+– Hue dinyatakan dalam derajat (0°–360°).
+– Jika hasil Hue negatif, tambahkan 360 agar masuk rentang standar.
+– Faktor ×60 digunakan karena spektrum warna dibagi menjadi 6 sektor:
+  0°–60° (Merah), 60°–120° (Kuning), 120°–180° (Hijau), dst.
+– Setiap sektor mewakili dominasi warna RGB dalam lingkaran warna.`;
+  }
+
+  const colors = ["#EF4444", "#10B981", "#3B82F6", "#F59E0B", "#06B6D4", "#8B5CF6", "#F97316", "#7C3AED", "#EC4899", "#A16207", "#111827", "#F9FAFB"];
+  const palette = document.getElementById("palette");
+
+  colors.forEach(color => {
+    const box = document.createElement("button");
+    box.className = "color-box";
+    box.style.backgroundColor = color;
+    box.setAttribute("aria-label", `Warna ${color}`);
+    box.type = "button";
+    box.tabIndex = 0;
+    box.onclick = () => {
+      const rgbMatch = getComputedStyle(box).backgroundColor.match(/\d+/g);
+      if(rgbMatch && rgbMatch.length === 3) {
+        const rgb = rgbMatch.map(Number);
+        document.getElementById("r").value = rgb[0];
+        document.getElementById("g").value = rgb[1];
+        document.getElementById("b").value = rgb[2];
+        updateColor();
+        box.focus();
+      }
+    };
+    palette.appendChild(box);
+  });
+
+  updateColor();
+  window.updateColor = updateColor;
+})();
+</script>
+
+</body>
+</html>

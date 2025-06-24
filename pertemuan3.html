@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pertemuan 3 - Algoritma Garis &amp; Poligon dengan Narasi Lengkap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&amp;display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-1: #9bbbde;
+      --color-2: #ab858a;
+      --color-3: #cf90a4;
+      --color-4: #9d7c9f;
+      --color-5: #5474aa;
+
+      --font-family: 'Poppins', sans-serif;
+      --font-color-primary: #243B5D; /* neutral gray-blue for body text */
+      --font-color-headline: #cf90a4; /* lighter pastel pink for main title */
+      --font-color-accent: #4e6793; /* accent color for h2 headings */
+      --background-light: #ffffff;
+      --border-radius: 12px;
+      --shadow-light: 0 4px 12px rgba(0,0,0,0.05);
+      --transition-speed: 0.3s;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: var(--font-family);
+      color: var(--font-color-primary);
+      background: linear-gradient(135deg, var(--color-1), var(--color-5));
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      line-height: 1.6;
+    }
+
+    main.container {
+      max-width: 1200px;
+      width: 100%;
+      background: var(--background-light);
+      border-radius: var(--border-radius);
+      padding: 40px 50px;
+      box-shadow: var(--shadow-light);
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    h1 {
+      font-size: 2.7rem;
+      font-weight: 700;
+      margin: 0 0 20px 0;
+      color: var(--font-color-headline);
+      text-align: center;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+      user-select: none;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--font-color-accent);
+      user-select: none;
+    }
+
+    section {
+      background: linear-gradient(135deg, var(--color-3), var(--color-4));
+      padding: 30px 35px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transition: box-shadow var(--transition-speed);
+    }
+    section:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    section > div:first-child {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px 20px;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--color-5);
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      padding: 8px 12px;
+      border: 2px solid var(--color-2);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: var(--font-family);
+      transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+      color: var(--font-color-primary);
+      min-width: 70px;
+      flex-shrink: 0;
+      background: #f9f5f7;
+    }
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--color-5);
+      box-shadow: 0 0 8px var(--color-5);
+      background: #fff8fb;
+    }
+
+    button {
+      padding: 10px 24px;
+      background-color: var(--color-5);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(84, 116, 170, 0.6);
+      transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    button:hover, button:focus {
+      background-color: #4a5f92;
+      transform: scale(1.05);
+      box-shadow: 0 6px 22px rgba(54, 79, 143, 0.75);
+      outline: none;
+    }
+
+    canvas {
+      border: 2px solid var(--color-2);
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, var(--color-1) 0%, var(--color-3) 100%);
+      box-shadow: inset 0 0 12px #d4c4ce;
+      width: 100%;
+      max-width: 400px;
+      height: 300px;
+      image-rendering: pixelated;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0 10px;
+      width: 100%;
+      font-weight: 600;
+      color: var(--color-2);
+      font-size: 1rem;
+      background: #fdf8fa;
+      border-radius: var(--border-radius);
+      box-shadow: 0 3px 12px rgba(172, 133, 138, 0.3);
+      overflow: hidden;
+    }
+    thead th {
+      padding: 14px 10px;
+      background: var(--color-3);
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tbody td {
+      text-align: center;
+      padding: 10px 8px;
+      background: #fff0f2;
+      border-bottom: 1px solid var(--color-2);
+      transition: background-color 0.25s;
+    }
+    tbody tr:hover td {
+      background-color: #fae8ec;
+      color: var(--color-5);
+    }
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .penjelasan-bawah {
+      background: #fff8fa;
+      border-radius: var(--border-radius);
+      padding: 18px 22px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      color: var(--color-5);
+      white-space: pre-wrap;
+      box-shadow: inset 0 0 12px #dcc8d0;
+      max-height: 180px;
+      overflow-y: auto;
+      user-select: text;
+      border: 1px solid var(--color-2);
+    }
+
+    @media (max-width: 880px) {
+      main.container {
+        padding: 30px 20px;
+      }
+      h1 {
+        font-size: 2.8rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+      input[type="number"],
+      input[type="text"] {
+        min-width: 60px;
+        font-size: 0.95rem;
+      }
+      button {
+        padding: 9px 20px;
+        font-size: 0.95rem;
+      }
+      canvas {
+        max-width: 100%;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-labelledby="main-title">
+    <h1 id="main-title">Pertemuan 3 - Algoritma Garis &amp; Poligon dengan Narasi Lengkap</h1>
+
+    <section id="algoritma-bf" aria-labelledby="bf-title" role="region">
+      <h2 id="bf-title">Algoritma Brute Force</h2>
+      <div>
+        <label for="x1-bf">X1:</label>
+        <input type="number" id="x1-bf" value="2" required aria-describedby="bf-desc" />
+        <label for="y1-bf">Y1:</label>
+        <input type="number" id="y1-bf" value="1" required />
+        <label for="x2-bf">X2:</label>
+        <input type="number" id="x2-bf" value="8" required />
+        <label for="y2-bf">Y2:</label>
+        <input type="number" id="y2-bf" value="5" required />
+        <button onclick="drawBruteForce()">Gambar &amp; Hitung</button>
+      </div>
+      <canvas id="canvas-bf" width="400" height="300" aria-label="Canvas output Algoritma Brute Force"></canvas>
+      <table id="tabel-bf" aria-describedby="bf-desc">
+        <thead><tr><th>Iterasi</th><th>X</th><th>Y</th></tr></thead><tbody></tbody>
+      </table>
+      <div class="penjelasan-bawah" id="narasi-bf"></div>
+    </section>
+
+    <section id="algoritma-dda" aria-labelledby="dda-title" role="region">
+      <h2 id="dda-title">Algoritma DDA</h2>
+      <div>
+        <label for="x1-dda">X1:</label>
+        <input type="number" id="x1-dda" value="2" required />
+        <label for="y1-dda">Y1:</label>
+        <input type="number" id="y1-dda" value="1" required />
+        <label for="x2-dda">X2:</label>
+        <input type="number" id="x2-dda" value="8" required />
+        <label for="y2-dda">Y2:</label>
+        <input type="number" id="y2-dda" value="5" required />
+        <button onclick="drawDDA()">Gambar &amp; Hitung</button>
+      </div>
+      <canvas id="canvas-dda" width="400" height="300" aria-label="Canvas output Algoritma DDA"></canvas>
+      <table id="tabel-dda">
+        <thead><tr><th>Iterasi</th><th>X</th><th>Y</th></tr></thead><tbody></tbody>
+      </table>
+      <div class="penjelasan-bawah" id="narasi-dda"></div>
+    </section>
+
+    <section id="algoritma-bres" aria-labelledby="bres-title" role="region">
+      <h2 id="bres-title">Algoritma Bresenham</h2>
+      <div>
+        <label for="x1-bres">X1:</label>
+        <input type="number" id="x1-bres" value="2" required />
+        <label for="y1-bres">Y1:</label>
+        <input type="number" id="y1-bres" value="1" required />
+        <label for="x2-bres">X2:</label>
+        <input type="number" id="x2-bres" value="8" required />
+        <label for="y2-bres">Y2:</label>
+        <input type="number" id="y2-bres" value="5" required />
+        <button onclick="drawBresenham()">Gambar &amp; Hitung</button>
+      </div>
+      <canvas id="canvas-bres" width="400" height="300" aria-label="Canvas output Algoritma Bresenham"></canvas>
+      <table id="tabel-bres">
+        <thead><tr><th>Iterasi</th><th>X</th><th>Y</th></tr></thead><tbody></tbody>
+      </table>
+      <div class="penjelasan-bawah" id="narasi-bres"></div>
+    </section>
+
+    <section id="algoritma-polygon" aria-labelledby="polygon-title" role="region">
+      <h2 id="polygon-title">Algoritma Poligon</h2>
+      <div>
+        <label for="polygon-points">Titik-titik (x1,y1,x2,y2,...):</label>
+        <input type="text" id="polygon-points" value="50,50,150,50,150,150,50,150" required />
+        <button onclick="drawPolygon()">Gambar &amp; Hitung</button>
+      </div>
+      <canvas id="canvas-polygon" width="400" height="300" aria-label="Canvas output Algoritma Poligon"></canvas>
+      <table id="tabel-polygon">
+        <thead><tr><th>Sisi</th><th>X</th><th>Y</th></tr></thead><tbody></tbody>
+      </table>
+      <div class="penjelasan-bawah" id="narasi-polygon"></div>
+      <h3>Contoh Titik untuk Berbagai Poligon:</h3>
+      <ul>
+        <li><strong>Segitiga:</strong> <code>50,50,150,50,100,150</code></li>
+        <li><strong>Segi Lima:</strong> <code>100,50,150,100,125,150,75,150,50,100</code></li>
+        <li><strong>Segi Enam:</strong> <code>100,50,150,100,125,150,75,150,50,100,100,0</code></li>
+        <li><strong>Segi Delapan:</strong> <code>100,50,150,50,200,100,200,150,150,200,100,200,50,150,50,100</code></li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Algoritma Brute Force
+    function drawBruteForce() {
+      const x1 = parseInt(document.getElementById("x1-bf").value);
+      const y1 = parseInt(document.getElementById("y1-bf").value);
+      const x2 = parseInt(document.getElementById("x2-bf").value);
+      const y2 = parseInt(document.getElementById("y2-bf").value);
+      const ctx = document.getElementById("canvas-bf").getContext("2d");
+      ctx.clearRect(0, 0, 400, 300);
+
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const m = dy / dx;
+      const tbody = document.querySelector("#tabel-bf tbody");
+      tbody.innerHTML = "";
+
+      let output = `Contoh Perhitungan Algoritma Brute Force:\n\n`;
+      output += `Rumus: y = m(x - x1) + y1\n`;
+      output += `Diketahui: (x1,y1) = (${x1},${y1}), (x2,y2) = (${x2},${y2})\n`;
+      output += `m = (${y2} - ${y1}) / (${x2} - ${x1}) = ${m.toFixed(2)}\n\n`;
+
+      ctx.fillStyle = "#7b5e7e"; // purple pixel color matching palette
+      for (let i = 0; i <= dx; i++) {
+        const x = x1 + i;
+        const y = m * (x - x1) + y1;
+        ctx.fillRect(x, Math.round(y), 1, 1);
+        const row = tbody.insertRow();
+        row.innerHTML = `<td>${i}</td><td>${x}</td><td>${Math.round(y)}</td>`;
+        output += `Iterasi ${i}:\n  x = ${x}\n  y = ${m.toFixed(2)} * (${x} - ${x1}) + ${y1} = ${y.toFixed(2)}\n  Dibulatkan: y = ${Math.round(y)}\n\n`;
+      }
+      document.getElementById("narasi-bf").textContent = output;
+    }
+
+    // Algoritma DDA
+    function drawDDA() {
+      const x1 = parseInt(document.getElementById("x1-dda").value);
+      const y1 = parseInt(document.getElementById("y1-dda").value);
+      const x2 = parseInt(document.getElementById("x2-dda").value);
+      const y2 = parseInt(document.getElementById("y2-dda").value);
+      const ctx = document.getElementById("canvas-dda").getContext("2d");
+      ctx.clearRect(0, 0, 400, 300);
+
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const steps = Math.max(Math.abs(dx), Math.abs(dy));
+      const xInc = dx / steps;
+      const yInc = dy / steps;
+
+      let x = x1;
+      let y = y1;
+      const tbody = document.querySelector("#tabel-dda tbody");
+      tbody.innerHTML = "";
+
+      let narasi = `Contoh Perhitungan Detail Algoritma DDA:\n\n`;
+      narasi += `1. Diketahui:\n   Titik awal P0 = (${x1}, ${y1})\n   Titik akhir P1 = (${x2}, ${y2})\n\n`;
+      narasi += `2. Hitung dx dan dy:\n   dx = x2 - x1 = ${x2} - ${x1} = ${dx}\n   dy = y2 - y1 = ${y2} - ${y1} = ${dy}\n\n`;
+      narasi += `3. Tentukan steps (jumlah langkah):\n   steps = max(|dx|, |dy|) = max(${Math.abs(dx)}, ${Math.abs(dy)}) = ${steps}\n\n`;
+      narasi += `4. Hitung x increment dan y increment:\n   xInc = dx / steps = ${dx} / ${steps} = ${xInc.toFixed(2)}\n   yInc = dy / steps = ${dy} / ${steps} = ${yInc.toFixed(2)}\n\n`;
+      narasi += `5. Iterasi setiap titik:\n`;
+
+      ctx.fillStyle = "#9d7c9f"; // muted purple pixel color
+      for (let i = 0; i <= steps; i++) {
+        ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+        const row = tbody.insertRow();
+        row.innerHTML = `<td>${i}</td><td>${Math.round(x)}</td><td>${Math.round(y)}</td>`;
+
+        narasi += `   Iterasi ke-${i}:\n     x = x sebelumnya + xInc = ${(x - xInc).toFixed(2)} + ${xInc.toFixed(2)} = ${x.toFixed(2)}\n`;
+        narasi += `     y = y sebelumnya + yInc = ${(y - yInc).toFixed(2)} + ${yInc.toFixed(2)} = ${y.toFixed(2)}\n`;
+        narasi += `     Koordinat dibulatkan: (${Math.round(x)}, ${Math.round(y)})\n\n`;
+
+        x += xInc;
+        y += yInc;
+      }
+
+      narasi += `6. Garis selesai digambar dari titik awal hingga titik akhir menggunakan Algoritma DDA.`;
+      document.getElementById("narasi-dda").textContent = narasi;
+    }
+
+    // Algoritma Bresenham
+    function drawBresenham() {
+      let x1 = parseInt(document.getElementById("x1-bres").value);
+      let y1 = parseInt(document.getElementById("y1-bres").value);
+      let x2 = parseInt(document.getElementById("x2-bres").value);
+      let y2 = parseInt(document.getElementById("y2-bres").value);
+      const ctx = document.getElementById("canvas-bres").getContext("2d");
+      ctx.clearRect(0, 0, 400, 300);
+
+      const dx = Math.abs(x2 - x1);
+      const dy = Math.abs(y2 - y1);
+      const sx = x1 < x2 ? 1 : -1;
+      const sy = y1 < y2 ? 1 : -1;
+      let err = dx - dy;
+
+      const tbody = document.querySelector("#tabel-bres tbody");
+      tbody.innerHTML = "";
+      let narasi = `Contoh Perhitungan Detail Algoritma Bresenham:\n\n`;
+      narasi += `1. Diketahui:\n   Titik awal = (${x1}, ${y1})\n   Titik akhir = (${x2}, ${y2})\n\n`;
+      narasi += `2. Hitung nilai awal:\n   dx = |x2 - x1| = |${x2} - ${x1}| = ${dx}\n   dy = |y2 - y1| = |${y2} - ${y1}| = ${dy}\n`;
+      narasi += `   err = dx - dy = ${dx} - ${dy} = ${err}\n\n`;
+      narasi += `3. Iterasi titik:\n   dx = ${dx}, dy = ${dy}, err = dx - dy = ${err}\n\n`;
+
+      let i = 0;
+      ctx.fillStyle = "#ab858a"; // soft mauve pixel color
+      while (true) {
+        ctx.fillRect(x1, y1, 1, 1);
+        const row = tbody.insertRow();
+        row.innerHTML = `<td>${i}</td><td>${x1}</td><td>${y1}</td>`;
+        narasi += `Iterasi ${i}: (${x1}, ${y1})\n`;
+        if (x1 === x2 && y1 === y2) break;
+        let e2 = 2 * err;
+        if (e2 > -dy) { err -= dy; x1 += sx; }
+        if (e2 < dx) { err += dx; y1 += sy; }
+        i++;
+      }
+      document.getElementById("narasi-bres").textContent = narasi;
+    }
+
+    // Algoritma Poligon
+    function drawPolygon() {
+      const input = document.getElementById("polygon-points").value.split(',').map(Number);
+      const ctx = document.getElementById("canvas-polygon").getContext("2d");
+      ctx.clearRect(0, 0, 400, 300);
+      const tbody = document.querySelector("#tabel-polygon tbody");
+      tbody.innerHTML = "";
+      let narasi = `Contoh Perhitungan Detail Poligon:\n\n`;
+      narasi += `1. Titik-titik input: ${input.join(', ')}\n\n`;
+      narasi += `2. Gambarkan garis antar titik berurutan:\n\n`;
+
+      const points = [];
+      for (let i = 0; i < input.length; i += 2) {
+        points.push({ x: input[i], y: input[i + 1] });
+      }
+
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i];
+        const b = points[(i + 1) % points.length];
+        let x = a.x;
+        let y = a.y;
+        const dx = Math.abs(b.x - a.x);
+        const dy = Math.abs(b.y - a.y);
+        const sx = a.x < b.x ? 1 : -1;
+        const sy = a.y < b.y ? 1 : -1;
+        let err = dx - dy;
+        narasi += `Sisi ke-${i + 1}: (${a.x},${a.y}) ke (${b.x},${b.y})\n`;
+        while (true) {
+          ctx.fillRect(x, y, 1, 1);
+          const row = tbody.insertRow();
+          row.innerHTML = `<td>${i + 1}</td><td>${x}</td><td>${y}</td>`;
+          if (x === b.x && y === b.y) break;
+          let e2 = 2 * err;
+          if (e2 > -dy) { err -= dy; x += sx; }
+          if (e2 < dx) { err += dx; y += sy; }
+        }
+        narasi += `  Titik digambar dengan algoritma Bresenham.\n\n`;
+      }
+      document.getElementById("narasi-polygon").textContent = narasi;
+    }
+  </script>
+</body>
+</html>

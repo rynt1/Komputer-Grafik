@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard Penjualan Dinamis dengan Gradasi Warna dan Data Bulanan</title>
+<style>
+  :root {
+    --color-rokok: #f05f57;  /* original red */
+    --color-beras: #457b9d;  /* original blue */
+    --color-telur: #f4a7b9;  /* original pink */
+    --font-family: 'Chaparral Pro', serif;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-family);
+    background-color: #391e10; /* deep dark brown */
+    color: #f0e7f6;
+    min-height: 100vh;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: rgba(255 255 255 / 0.25);
+    color: #fff;
+    padding: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 0.05em;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px rgba(0,0,0,0.7);
+    backdrop-filter: blur(14px);
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-grow: 1;
+    background: rgba(255 255 255 / 0.25);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    color: #f0e7f6;
+  }
+  form {
+    background: rgba(0 0 0 / 0.15);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    margin-bottom: 1.5rem;
+    color: #ffeaea;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .labels-row {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .input-group-label {
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+  }
+  .input-label {
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    font-size: 1rem;
+    text-shadow: 0 0 4px rgba(0,0,0,0.6);
+  }
+  input[type="text"] {
+    padding: 0.4rem 0.8rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 2px solid #d1c7bc;
+    background: rgba(255 255 255 / 0.3);
+    color: #f0e7f6;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus {
+    border-color: var(--color-rokok);
+    outline: none;
+    background: rgba(255 255 255 / 0.45);
+  }
+  .monthly-section {
+    margin-bottom: 1rem;
+  }
+  .monthly-label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 4px rgba(0,0,0,0.7);
+  }
+  .monthly-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(80px, 1fr));
+    gap: 12px;
+    align-items: center;
+  }
+  label.monthly-month {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    user-select: none;
+  }
+  input[type="number"] {
+    padding: 0.3rem 0.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 2px solid #d1c7bc;
+    background: rgba(255 255 255 / 0.3);
+    color: #f0e7f6;
+    text-align: center;
+    transition: border-color 0.3s ease;
+  }
+  input[type="number"]:focus {
+    border-color: var(--color-rokok);
+    outline: none;
+    background: rgba(255 255 255 / 0.45);
+  }
+  .color-red { color: var(--color-rokok); }
+  .color-blue { color: var(--color-beras); }
+  .color-pink { color: var(--color-telur); }
+  .charts {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .chart-box {
+    background: rgba(255 255 255 / 0.3);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    width: 480px;
+    padding: 1rem 1.5rem 2rem 1.5rem;
+    text-align: center;
+    color: #f0e7f6;
+  }
+  .chart-title {
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #ffeaea;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+  }
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    flex-wrap: wrap;
+    color: #ffd7d6;
+    text-shadow: 0 0 4px rgba(0,0,0,0.7);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1rem;
+  }
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  footer {
+    text-align: center;
+    padding: 1rem 0;
+    color: #ffd7d6;
+    font-size: 0.9rem;
+    margin-top: 2rem;
+    text-shadow: 0 0 6px rgba(0,0,0,0.7);
+  }
+  @media (max-width: 1024px) {
+    main {
+      max-width: 100%;
+      padding: 1rem;
+    }
+    .charts {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .chart-box {
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 1.5rem;
+    }
+    .monthly-inputs {
+      grid-template-columns: repeat(3, minmax(70px, 1fr));
+      gap: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>Dashboard Penjualan</header>
+
+<main>
+  <form aria-label="Form input label produk dan persentase penjualan bulanan">
+    <div class="labels-row">
+      <div class="input-group-label">
+        <span id="label-rokok-text" class="input-label">Label Rokok (<span class="color-red">Merah</span>)</span>
+        <input type="text" id="input-rokok" value="Rokok" aria-describedby="label-rokok-text" />
+      </div>
+      <div class="input-group-label">
+        <span id="label-beras-text" class="input-label">Label Beras (<span class="color-blue">Biru</span>)</span>
+        <input type="text" id="input-beras" value="Beras" aria-describedby="label-beras-text" />
+      </div>
+      <div class="input-group-label">
+        <span id="label-telur-text" class="input-label">Label Telur (<span class="color-pink">Pink</span>)</span>
+        <input type="text" id="input-telur" value="Telur" aria-describedby="label-telur-text" />
+      </div>
+    </div>
+
+    <section class="monthly-section">
+      <label id="label-rokok-percent" class="monthly-label color-red" for="rokok-jan">Persentase Rokok (%)</label>
+      <div class="monthly-inputs" aria-labelledby="label-rokok-percent">
+        <label class="monthly-month">Jan</label>
+        <label class="monthly-month">Feb</label>
+        <label class="monthly-month">Mar</label>
+        <label class="monthly-month">Apr</label>
+        <label class="monthly-month">Mei</label>
+        <label class="monthly-month">Jun</label>
+
+        <input type="number" id="rokok-jan" min="5" max="100" step="5" value="40" />
+        <input type="number" id="rokok-feb" min="5" max="100" step="5" value="35" />
+        <input type="number" id="rokok-mar" min="5" max="100" step="5" value="40" />
+        <input type="number" id="rokok-apr" min="5" max="100" step="5" value="30" />
+        <input type="number" id="rokok-mei" min="5" max="100" step="5" value="35" />
+        <input type="number" id="rokok-jun" min="5" max="100" step="5" value="40" />
+      </div>
+    </section>
+
+    <section class="monthly-section">
+      <label id="label-beras-percent" class="monthly-label color-blue" for="beras-jan">Persentase Beras (%)</label>
+      <div class="monthly-inputs" aria-labelledby="label-beras-percent">
+        <label class="monthly-month">Jan</label>
+        <label class="monthly-month">Feb</label>
+        <label class="monthly-month">Mar</label>
+        <label class="monthly-month">Apr</label>
+        <label class="monthly-month">Mei</label>
+        <label class="monthly-month">Jun</label>
+
+        <input type="number" id="beras-jan" min="5" max="100" step="5" value="35" />
+        <input type="number" id="beras-feb" min="5" max="100" step="5" value="40" />
+        <input type="number" id="beras-mar" min="5" max="100" step="5" value="35" />
+        <input type="number" id="beras-apr" min="5" max="100" step="5" value="45" />
+        <input type="number" id="beras-mei" min="5" max="100" step="5" value="35" />
+        <input type="number" id="beras-jun" min="5" max="100" step="5" value="35" />
+      </div>
+    </section>
+
+    <section class="monthly-section">
+      <label id="label-telur-percent" class="monthly-label color-pink" for="telur-jan">Persentase Telur (%)</label>
+      <div class="monthly-inputs" aria-labelledby="label-telur-percent">
+        <label class="monthly-month">Jan</label>
+        <label class="monthly-month">Feb</label>
+        <label class="monthly-month">Mar</label>
+        <label class="monthly-month">Apr</label>
+        <label class="monthly-month">Mei</label>
+        <label class="monthly-month">Jun</label>
+
+        <input type="number" id="telur-jan" min="5" max="100" step="5" value="25" />
+        <input type="number" id="telur-feb" min="5" max="100" step="5" value="15" />
+        <input type="number" id="telur-mar" min="5" max="100" step="5" value="25" />
+        <input type="number" id="telur-apr" min="5" max="100" step="5" value="15" />
+        <input type="number" id="telur-mei" min="5" max="100" step="5" value="20" />
+        <input type="number" id="telur-jun" min="5" max="100" step="5" value="25" />
+      </div>
+    </section>
+  </form>
+
+  <div class="charts" aria-label="Area grafik dan diagram penjualan">
+    <div class="chart-box" aria-label="Grafik garis penjualan">
+      <div class="chart-title">Grafik Garis Penjualan</div>
+      <canvas id="lineChart" width="480" height="400"></canvas>
+      <div class="legend" role="list" aria-label="Keterangan warna produk" id="legend-line"></div>
+    </div>
+    <div class="chart-box" aria-label="Diagram lingkaran penjualan">
+      <div class="chart-title">Diagram Lingkaran Penjualan</div>
+      <canvas id="pieChart" width="480" height="400"></canvas>
+      <div class="legend" role="list" aria-label="Keterangan warna produk" id="legend-pie"></div>
+    </div>
+  </div>
+</main>
+
+<footer>&copy;2025 Dashboard Penjualan</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const colors = {
+  rokok: '#f05f57',
+  beras: '#457b9d',
+  telur: '#f4a7b9',
+};
+
+const inputRokokLabel = document.getElementById('input-rokok');
+const labelRokokText = document.getElementById('label-rokok-text');
+const inputBerasLabel = document.getElementById('input-beras');
+const labelBerasText = document.getElementById('label-beras-text');
+const inputTelurLabel = document.getElementById('input-telur');
+const labelTelurText = document.getElementById('label-telur-text');
+
+const labelRokokPercent = document.getElementById('label-rokok-percent');
+const labelBerasPercent = document.getElementById('label-beras-percent');
+const labelTelurPercent = document.getElementById('label-telur-percent');
+
+const months = ['jan', 'feb', 'mar', 'apr', 'mei', 'jun'];
+const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
+
+function getMonthlyInputs(product) {
+  return months.map(m => document.getElementById(product + '-' + m));
+}
+
+function updateColorLabels() {
+  const valR = inputRokokLabel.value.trim() || 'Rokok';
+  labelRokokText.innerHTML = `Label ${valR} (<span class="color-red">Merah</span>)`;
+  labelRokokPercent.textContent = `Persentase ${valR} (%)`;
+
+  const valB = inputBerasLabel.value.trim() || 'Beras';
+  labelBerasText.innerHTML = `Label ${valB} (<span class="color-blue">Biru</span>)`;
+  labelBerasPercent.textContent = `Persentase ${valB} (%)`;
+
+  const valT = inputTelurLabel.value.trim() || 'Telur';
+  labelTelurText.innerHTML = `Label ${valT} (<span class="color-pink">Pink</span>)`;
+  labelTelurPercent.textContent = `Persentase ${valT} (%)`;
+}
+
+function roundToNearest5(value) {
+  return Math.round(value / 5) * 5;
+}
+
+function getMonthlyValues(product) {
+  const inputs = getMonthlyInputs(product);
+  return inputs.map(input => {
+    let v = parseFloat(input.value);
+    if (isNaN(v) || v < 5) return 5;
+    if (v > 100) return 100;
+    v = roundToNearest5(v);
+    input.value = v;
+    return v;
+  });
+}
+
+function sumValues(values) {
+  return values.reduce((a,b) => a+b, 0);
+}
+
+function updateLegend(containerId, labels, colors) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  labels.forEach((label, i) => {
+    const colorKeys = ['rokok', 'beras', 'telur'];
+    const color = colors[colorKeys[i]] || '#999';
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.setAttribute('role', 'listitem');
+    const colorBox = document.createElement('span');
+    colorBox.className = 'legend-color';
+    colorBox.style.backgroundColor = color;
+    item.appendChild(colorBox);
+    item.appendChild(document.createTextNode(label));
+    container.appendChild(item);
+  });
+}
+
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+const lineCtx = document.getElementById('lineChart').getContext('2d');
+
+let pieChart = new Chart(pieCtx, {
+  type: 'pie',
+  data: {
+    labels: [],
+    datasets: [{
+      data: [40, 35, 25],
+      backgroundColor: [colors.rokok, colors.beras, colors.telur],
+      borderColor: '#fff',
+      borderWidth: 2,
+      hoverOffset: 30
+    }]
+  },
+  options: {
+    plugins: {
+      legend: false,
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.label}: ${ctx.parsed.toFixed(1)}%`
+        }
+      }
+    }
+  }
+});
+
+let lineChart = new Chart(lineCtx, {
+  type: 'line',
+  data: {
+    labels: monthLabels,
+    datasets: [
+      {
+        label: '',
+        data: [],
+        borderColor: colors.rokok,
+        backgroundColor: colors.rokok + '88',
+        tension: 0.3,
+        fill: false,
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: colors.rokok
+      },
+      {
+        label: '',
+        data: [],
+        borderColor: colors.beras,
+        backgroundColor: colors.beras + '88',
+        tension: 0.3,
+        fill: false,
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: colors.beras
+      },
+      {
+        label: '',
+        data: [],
+        borderColor: colors.telur,
+        backgroundColor: colors.telur + '88',
+        tension: 0.3,
+        fill: false,
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: colors.telur
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'nearest', intersect: false },
+    plugins: {
+      legend: false,
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: { display: true, text: 'Bulan', font: { weight: '600', size: 14 }, color: '#fff' },
+        grid: { display: false, color: 'rgba(255,255,255,0.1)' },
+        ticks: { color: '#fff' }
+      },
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: { display: true, text: 'Persentase (%)', font: { weight: '600', size: 14 }, color: '#fff' },
+        ticks: {
+          stepSize: 5,
+          color: '#fff',
+          callback: val => val + '%'
+        },
+        grid: { color: 'rgba(255,255,255,0.2)' }
+      }
+    }
+  }
+});
+
+function updateChartsAndLegends() {
+  const labelR = inputRokokLabel.value.trim() || 'Rokok';
+  const labelB = inputBerasLabel.value.trim() || 'Beras';
+  const labelT = inputTelurLabel.value.trim() || 'Telur';
+
+  const labels = [labelR, labelB, labelT];
+  updateLegend('legend-pie', labels, colors);
+  updateLegend('legend-line', labels, colors);
+
+  pieChart.data.labels = labels;
+  // Data pie chart fixed sesuai permintaan
+  pieChart.data.datasets[0].data = [40, 35, 25];
+  pieChart.update();
+
+  lineChart.data.datasets[0].label = labelR;
+  lineChart.data.datasets[1].label = labelB;
+  lineChart.data.datasets[2].label = labelT;
+
+  lineChart.data.datasets[0].data = getMonthlyValues('rokok');
+  lineChart.data.datasets[1].data = getMonthlyValues('beras');
+  lineChart.data.datasets[2].data = getMonthlyValues('telur');
+  lineChart.update();
+}
+
+[inputRokokLabel, inputBerasLabel, inputTelurLabel].forEach(input => {
+  input.addEventListener('input', () => {
+    updateColorLabels();
+    updateChartsAndLegends();
+  });
+});
+
+[...getMonthlyInputs('rokok'), ...getMonthlyInputs('beras'), ...getMonthlyInputs('telur')].forEach(input => {
+  input.addEventListener('input', () => {
+    updateChartsAndLegends();
+  });
+});
+
+updateColorLabels();
+updateChartsAndLegends();
+</script>
+
+</body>
+</html>

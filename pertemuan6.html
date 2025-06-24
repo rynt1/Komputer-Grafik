@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pewarnaan Bidang 4 Bagian dengan Penjelasan Otomatis & Contoh Luminance</title>
+<style>
+  :root {
+    /* Background gradient colors for the whole page */
+    --page-bg-start: #0C7BB3;
+    --page-bg-end: #F2BAE8;
+
+    /* Unified color for quadrants, formula, and interactive sections */
+    --shared-bg-color: #F9BFDA; /* soft pastel pink */
+    --explanation-bg: #f0f4ff; /* light pastel blue for explanation */
+    --calculation-bg: #e0f7fa; /* light pastel cyan for calculation */
+    --shared-text-color: #3e2c51; /* dark muted purple for text */
+    
+    /* Text colors */
+    --text-primary: #3e2c51;
+    --text-secondary: #6b7280; /* Neutral gray */
+
+    /* Accent and primary colors */
+    --primary-color: #0C7BB3;
+    --accent-color: #9F879F;
+
+    /* Shadows and borders */
+    --shadow-light: rgba(159, 135, 159, 0.15);
+    --border-color: rgba(159, 135, 159, 0.3);
+
+    /* Typography */
+    --font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Dimensions */
+    --shape-size: 300px;
+  }
+
+  /* Import Google Font Poppins */
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 2.5rem 1rem;
+    /* Vertical gradient background with the requested colors */
+    background: linear-gradient(180deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    font-weight: 700;
+    font-size: 3.6rem;
+    margin-bottom: 2rem;
+    color: #d6c4e3; /* Brightened for main title */
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  /* Card styles */
+  .input-section,
+  .result-section {
+    background: var(--shared-bg-color);
+    box-shadow: 0 8px 20px var(--shadow-light);
+    border-radius: 0.75rem;
+    padding: 2rem 2.5rem;
+    flex: 1 1 320px;
+    max-width: 450px;
+    color: var(--shared-text-color);
+    transition: background-color 0.3s ease;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--shared-text-color);
+    font-size: 1rem;
+  }
+
+  .color-input-group {
+    margin-bottom: 1.5rem;
+  }
+
+  input[type="color"],
+  input[type="text"],
+  input[type="range"] {
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    font-size: 1.1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    transition: border-color 0.25s ease, box-shadow 0.3s ease;
+    background-color: white;
+    color: var(--shared-text-color);
+    font-family: var(--font-family);
+  }
+
+  input[type="color"] {
+    cursor: pointer;
+  }
+
+  input[type="color"]:focus,
+  input[type="text"]:focus,
+  input[type="range"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 6px var(--primary-color);
+    outline: none;
+  }
+
+  /* Color fields container styling - the quadrants */
+  .color-field {
+    margin-top: 1.3rem;
+    width: var(--shape-size);
+    height: var(--shape-size);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    border-radius: 1rem;
+    box-shadow: 0 12px 26px rgba(12, 123, 179, 0.22);
+    overflow: hidden;
+    background: var(--shared-bg-color);
+  }
+
+  /* Each quadrant styling */
+  .color-quadrant {
+    border: 1px solid var(--border-color);
+    transition: background-color 0.4s ease;
+    position: relative;
+  }
+
+  /* Explanation and calculation containers */
+  .explanation {
+    margin-top: 2rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    background: var(--explanation-bg);
+    padding: 1.5rem 2rem;
+    border-radius: 0.75rem;
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--shared-text-color);
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 20px rgba(159, 135, 159, 0.15);
+  }
+
+  .calculation {
+    margin-top: 1.5rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    background: var(--calculation-bg);
+    padding: 1.5rem 2rem;
+    border-radius: 0.75rem;
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--shared-text-color);
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 20px rgba(159, 135, 159, 0.15);
+  }
+
+  /* Section heading inside luminance info and interactive boxes */
+  section.luminance-info,
+  section.interactive-luminance {
+    margin-top: 3rem;
+    background: var(--calculation-bg);
+    color: var(--shared-text-color);
+    padding: 2rem 2.5rem;
+    border-radius: 1rem;
+    max-width: 450px;
+    box-shadow: 0 8px 24px rgba(159, 135, 159, 0.15);
+  }
+
+  section.luminance-info h2,
+  section.interactive-luminance h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 2.2rem;
+    letter-spacing: 0.02em;
+  }
+
+  section.luminance-info p,
+  section.interactive-luminance p {
+    line-height: 1.6;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .formula {
+    font-family: 'Courier New', Courier, monospace;
+    background: #fdf4f8;
+    padding: 1.25rem 1.5rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+    overflow-x: auto;
+    color: var(--shared-text-color);
+    box-shadow: 0 4px 15px rgba(12, 123, 179, 0.15);
+  }
+
+  /* Interactive Luminance example styling */
+  .interactive-luminance label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--primary-color);
+  }
+
+  .interactive-luminance .output {
+    font-family: 'Courier New', Courier, monospace;
+    background: #fdf4f8;
+    padding: 1rem 1.3rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+    color: var(--shared-text-color);
+    white-space: pre-wrap;
+    box-shadow: 0 6px 20px rgba(12, 123, 179, 0.15);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 700px) {
+    .container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .input-section, .result-section, .luminance-info, .interactive-luminance {
+      max-width: 90vw;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Pertemuan 6 - Pewarnaan Bidang</h1>
+
+  <div class="container">
+    <section class="input-section" aria-label="Input warna untuk setiap bidang">
+      <div class="color-input-group">
+        <label for="colorPicker1">Warna Bidang 1 (Kiri Atas):</label>
+        <input type="color" id="colorPicker1" aria-describedby="colorCode1"/>
+        <input type="text" id="colorCode1" maxlength="7" pattern="^#([A-Fa-f0-9]{6})$" aria-label="Kode warna bidang 1"/>
+      </div>
+      <div class="color-input-group">
+        <label for="colorPicker2">Warna Bidang 2 (Kanan Atas):</label>
+        <input type="color" id="colorPicker2" aria-describedby="colorCode2"/>
+        <input type="text" id="colorCode2" maxlength="7" pattern="^#([A-Fa-f0-9]{6})$" aria-label="Kode warna bidang 2"/>
+      </div>
+      <div class="color-input-group">
+        <label for="colorPicker3">Warna Bidang 3 (Kiri Bawah):</label>
+        <input type="color" id="colorPicker3" aria-describedby="colorCode3"/>
+        <input type="text" id="colorCode3" maxlength="7" pattern="^#([A-Fa-f0-9]{6})$" aria-label="Kode warna bidang 3"/>
+      </div>
+      <div class="color-input-group">
+        <label for="colorPicker4">Warna Bidang 4 (Kanan Bawah):</label>
+        <input type="color" id="colorPicker4" aria-describedby="colorCode4"/>
+        <input type="text" id="colorCode4" maxlength="7" pattern="^#([A-Fa-f0-9]{6})$" aria-label="Kode warna bidang 4"/>
+      </div>
+    </section>
+
+    <section class="result-section" aria-label="Bidang warna dan penjelasan">
+      <div class="color-field" aria-label="Bidang warna dibagi 4">
+        <div id="quad1" class="color-quadrant" aria-label="Bidang 1"></div>
+        <div id="quad2" class="color-quadrant" aria-label="Bidang 2"></div>
+        <div id="quad3" class="color-quadrant" aria-label="Bidang 3"></div>
+        <div id="quad4" class="color-quadrant" aria-label="Bidang 4"></div>
+      </div>
+
+      <div class="explanation" id="explanation"></div>
+      <div class="calculation" id="calculation"></div>
+    </section>
+  </div>
+
+  <section class="luminance-info" aria-label="Penjelasan rumus luminance dan keterangan kecerahan">
+    <h2>Rumus dan Keterangan Kecerahan Warna (Luminance)</h2>
+    <p>
+      Luminance adalah ukuran tingkat kecerahan warna yang dirasakan manusia.<br />
+      Rumus luminance dari warna dalam format RGB (sRGB) adalah:
+    </p>
+    <div class="formula">
+      Luminance (L) = 0.2126 × R + 0.7152 × G + 0.0722 × B
+    </div>
+    <p>
+      Dengan:<br />
+      - R, G, B adalah nilai komponen warna merah, hijau, dan biru (0 - 255).<br />
+      - Koefisien mencerminkan sensitivitas mata terhadap warna hijau terbesar, merah sedang, dan biru kecil.<br /><br />
+      Interpretasi nilai luminance:<br />
+      - 0 - 85 &rarr; Warna gelap<br />
+      - 86 - 170 &rarr; Warna sedang<br />
+      - 171 - 255 &rarr; Warna terang
+    </p>
+  </section>
+
+  <section class="interactive-luminance" aria-label="Contoh interaktif konversi luminance">
+    <h2>Contoh Cara Mengalikan Nilai Luminance 0-1 ke Skala 0-255</h2>
+    <label for="luminanceRange">Pilih nilai luminance (0 sampai 1):</label>
+    <input type="range" id="luminanceRange" min="0" max="1" step="0.001" value="0.9278" />
+    <div class="output" id="luminanceCalcOutput"></div>
+  </section>
+
+<script>
+  // Utility to generate random hex color
+  function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i=0; i<6; i++) {
+      color += letters[Math.floor(Math.random()*16)];
+    }
+    return color;
+  }
+
+  // Setup quadrants with random colors and sync inputs
+  const quadrants = [
+    {
+      id: 'quad1',
+      colorPicker: document.getElementById('colorPicker1'),
+      colorCode: document.getElementById('colorCode1'),
+      div: document.getElementById('quad1'),
+      label: 'Bidang 1 (Kiri Atas)'
+    },
+    {
+      id: 'quad2',
+      colorPicker: document.getElementById('colorPicker2'),
+      colorCode: document.getElementById('colorCode2'),
+      div: document.getElementById('quad2'),
+      label: 'Bidang 2 (Kanan Atas)'
+    },
+    {
+      id: 'quad3',
+      colorPicker: document.getElementById('colorPicker3'),
+      colorCode: document.getElementById('colorCode3'),
+      div: document.getElementById('quad3'),
+      label: 'Bidang 3 (Kiri Bawah)'
+    },
+    {
+      id: 'quad4',
+      colorPicker: document.getElementById('colorPicker4'),
+      colorCode: document.getElementById('colorCode4'),
+      div: document.getElementById('quad4'),
+      label: 'Bidang 4 (Kanan Bawah)'
+    }
+  ];
+
+  // Validate hex code
+  function validateHex(hex) {
+    return /^#([a-f0-9]{6})$/i.test(hex);
+  }
+
+  // Convert hex to RGB
+  function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r, g, b };
+  }
+
+  // Convert RGB to HSL
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b),
+          min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return {
+      h: Math.round(h * 360),
+      s: Math.round(s * 100),
+      l: Math.round(l * 100)
+    };
+  }
+
+  // Calculate luminance
+  function calculateLuminance(r, g, b) {
+    function channel(c) {
+      c /= 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055)/1.055, 2.4);
+    }
+    const R = channel(r);
+    const G = channel(g);
+    const B = channel(b);
+    return 255 * (0.2126 * R + 0.7152 * G + 0.0722 * B);
+  }
+
+  // Luminance category text
+  function luminanceCategory(value) {
+    if (value <= 85) return 'Gelap';
+    else if (value <= 170) return 'Sedang';
+    else return 'Terang';
+  }
+
+  // Format decimal to string fixed 4 digits
+  function formatContribution(value) {
+    return value.toFixed(4);
+  }
+
+  // Generate explanation and calculation texts
+  function generateExplanationAndCalculation() {
+    let explanationText = 'Penjelasan Warna Setiap Bidang:\n\n';
+    let calculationText = 'Perhitungan Kecerahan Warna (Luminance) untuk setiap bidang:\n\n';
+
+    quadrants.forEach(({ div, colorPicker, label }) => {
+      const hex = colorPicker.value.toLowerCase();
+      if (!validateHex(hex)) {
+        explanationText += `${label}: Kode warna tidak valid\n\n`;
+        calculationText += `${label}: Tidak ada data karena kode warna tidak valid\n\n`;
+        return;
+      }
+
+      const { r, g, b } = hexToRgb(hex);
+      const { h, s, l } = rgbToHsl(r, g, b);
+      const lum = calculateLuminance(r, g, b);
+      const lumCat = luminanceCategory(lum);
+
+      explanationText += `${label}:\n- RGB: (${r}, ${g}, ${b})\n- HSL: (${h}°, ${s}%, ${l}%)\n\n`;
+
+      function channelLinear(c) {
+        c /= 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      }
+      const rLin = channelLinear(r);
+      const gLin = channelLinear(g);
+      const bLin = channelLinear(b);
+
+      calculationText += `${label}:\n`;
+      calculationText += `R channel linear: ${(r/255).toFixed(3)} → ${formatContribution(rLin)}\n`;
+      calculationText += `G channel linear: ${(g/255).toFixed(3)} → ${formatContribution(gLin)}\n`;
+      calculationText += `B channel linear: ${(b/255).toFixed(3)} → ${formatContribution(bLin)}\n`;
+      calculationText += `Luminance = 0.2126×R + 0.7152×G + 0.0722×B\n`;
+      calculationText += `Luminance = ${(0.2126 * rLin).toFixed(4)} + ${(0.7152 * gLin).toFixed(4)} + ${(0.0722 * bLin).toFixed(4)}\n`;
+      calculationText += `Luminance ≈ ${lum.toFixed(2)} (Kategori: ${lumCat})\n\n`;
+    });
+
+    document.getElementById('explanation').textContent = explanationText.trim();
+    document.getElementById('calculation').textContent = calculationText.trim();
+  }
+
+  // Sync the UI inputs and quadrant colors
+  function syncColorInputs(quadrant) {
+    quadrant.colorPicker.addEventListener('input', () => {
+      const hex = quadrant.colorPicker.value.toLowerCase();
+      quadrant.colorCode.value = hex;
+      quadrant.div.style.backgroundColor = hex;
+      generateExplanationAndCalculation();
+    });
+
+    quadrant.colorCode.addEventListener('input', () => {
+      let val = quadrant.colorCode.value.toLowerCase();
+      if (!val.startsWith('#')) val = '#' + val;
+      if (validateHex(val)) {
+        quadrant.colorPicker.value = val;
+        quadrant.div.style.backgroundColor = val;
+      }
+      generateExplanationAndCalculation();
+    });
+  }
+
+  // Initialize random colors on page load and set up events
+  window.addEventListener('DOMContentLoaded', () => {
+    quadrants.forEach(q => {
+      const randomColor = getRandomColor();
+      q.colorPicker.value = randomColor;
+      q.colorCode.value = randomColor;
+      q.div.style.backgroundColor = randomColor;
+      syncColorInputs(q);
+    });
+    generateExplanationAndCalculation();
+  });
+
+  // Utility to generate random hex color
+  function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i=0; i<6; i++) {
+      color += letters[Math.floor(Math.random()*16)];
+    }
+    return color;
+  }
+
+  // Interactive luminance conversion 0-1 to 0-255 scale
+  const luminanceRange = document.getElementById('luminanceRange');
+  const luminanceCalcOutput = document.getElementById('luminanceCalcOutput');
+
+  function updateLuminanceCalc(value) {
+    const scaled = (value * 255).toFixed(2);
+    luminanceCalcOutput.textContent = 
+      `Langkah Perhitungan:\n` +
+      `1. Nilai luminance dalam skala 0 - 1: ${value}\n` +
+      `2. Kalikan dengan 255 untuk konversi ke skala 0 - 255:\n` +
+      `   ${value} × 255 = ${scaled}\n\n` +
+      `Jadi, luminance pada skala 0-255 adalah ${scaled}.`;
+  }
+
+  luminanceRange.addEventListener('input', e => {
+    updateLuminanceCalc(e.target.value);
+  });
+
+  // Initialize interactive luminance display on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    updateLuminanceCalc(luminanceRange.value);
+  });
+</script>
+</body>
+</html>

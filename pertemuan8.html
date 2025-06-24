@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Transformasi, Translasi, dan Rotasi dalam Komputer Grafik</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #121229;
+    color: #eef1f7;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  header {
+    background-color: #1f2a63;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+  header h1 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.9rem;
+    color: #75b9ff;
+    letter-spacing: 0.05em;
+  }
+
+  main {
+    flex-grow: 1;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  section.intro {
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    color: #ccd8f7;
+  }
+
+  section.intro p {
+    margin-bottom: 1rem;
+  }
+
+  section.intro p.emphasize {
+    font-style: italic;
+    color: #97cbff;
+    font-size: 1.2rem;
+  }
+
+  section.inputs {
+    background: #1e274e;
+    border-radius: 8px;
+    padding: 1.8rem 2rem;
+    box-shadow: 0 0 15px #2c3e99;
+    margin-bottom: 2rem;
+  }
+  section.inputs h2 {
+    margin: 0 0 1rem 0;
+    color: #7ec0ff;
+  }
+
+  .input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .input-group label {
+    flex: 1 1 150px;
+    align-self: center;
+    font-weight: 600;
+    color: #a3b7f9;
+  }
+
+  .input-group input {
+    flex: 2 1 150px;
+    padding: 0.4rem 0.65rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    background: #2a3976;
+    color: #d9e1ff;
+    border: 1px solid #3f5083;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .input-group input:focus {
+    border-color: #7bb2ff;
+    box-shadow: 0 0 7px #7bb2ff88;
+  }
+
+  section.visual {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  section.visual h2 {
+    color: #7ec0ff;
+    margin-bottom: 0.7rem;
+  }
+  canvas {
+    border-radius: 8px;
+    background: #121228;
+    box-shadow: 0 0 20px #3a67ff88;
+    max-width: 100%;
+    height: auto;
+  }
+
+  section.result {
+    background: #1e274f;
+    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    font-family: 'Consolas', monospace;
+    white-space: pre-wrap;
+    user-select: text;
+    box-shadow: 0 0 15px #23498f;
+    color: #cbd5fc;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  footer {
+    font-size: 0.85rem;
+    color: #7a87bcaa;
+    padding: 1rem 0 1.5rem 0;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .input-group {
+      flex-direction: column;
+    }
+    .input-group label,
+    .input-group input {
+      flex: unset;
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pertemuan 8 - Transformasi, Translasi, dan Rotasi dalam Komputer Grafik</h1>
+</header>
+<main>
+  <section class="intro">
+    <p>
+      Dalam komputer grafik, <strong>transformasi</strong> merupakan perubahan posisi, ukuran, atau orientasi objek dalam ruang koordinat. 
+      Dua transformasi dasar yang umum adalah <strong>translasi</strong> (pergeseran posisi) dan <strong>rotasi</strong> (perputaran objek di sekitar titik atau sumbu).
+    </p>
+  </section>
+
+  <section class="inputs">
+    <h2>Input Parameter Titik dan Transformasi</h2>
+    <div class="input-group">
+      <label for="x">Koordinat Titik X:</label>
+      <input type="number" id="x" value="2" step="0.01" />
+      <label for="y">Koordinat Titik Y:</label>
+      <input type="number" id="y" value="3" step="0.01" />
+    </div>
+
+    <div class="input-group">
+      <label for="tx">Translasi X:</label>
+      <input type="number" id="tx" value="1" step="0.01" />
+      <label for="ty">Translasi Y:</label>
+      <input type="number" id="ty" value="2" step="0.01" />
+    </div>
+
+    <div class="input-group">
+      <label for="rotation">Rotasi (derajat):</label>
+      <input type="number" id="rotation" value="30" step="0.1" />
+      <label for="rotCenterX">Titik Pusat Rotasi X:</label>
+      <input type="number" id="rotCenterX" value="0" step="0.01" />
+      <label for="rotCenterY">Titik Pusat Rotasi Y:</label>
+      <input type="number" id="rotCenterY" value="0" step="0.01" />
+    </div>
+  </section>
+
+  <section class="visual">
+    <h2>Visualisasi Transformasi</h2>
+    <canvas id="canvas" width="600" height="400" aria-label="Visualisasi Transformasi Titik"></canvas>
+    <p style="color:#a0baff; margin-top: 0.5rem; font-size: 0.9rem;">
+      Titik biru: Titik awal,<br />
+      Titik hijau: Titik setelah translasi,<br />
+      Titik oranye: Titik setelah rotasi,<br />
+      Garis berwarna menghubungkan transformasi, sumbu digambar untuk referensi.
+    </p>
+  </section>
+
+  <section class="result" id="result" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+    <!-- Narasi perhitungan otomatis akan muncul di sini -->
+  </section>
+</main>
+
+<footer>
+  &copy; 2024 - Transformasi, Translasi, dan Rotasi Komputer Grafik
+</footer>
+
+<script>
+(() => {
+  const inputs = {
+    x: document.getElementById('x'),
+    y: document.getElementById('y'),
+    tx: document.getElementById('tx'),
+    ty: document.getElementById('ty'),
+    rotation: document.getElementById('rotation'),
+    rotCenterX: document.getElementById('rotCenterX'),
+    rotCenterY: document.getElementById('rotCenterY'),
+  };
+
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  function drawCircle(x, y, radius, color, label = '') {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+    if (label) {
+      ctx.fillStyle = '#ddd';
+      ctx.font = '14px Poppins, sans-serif';
+      ctx.fillText(label, x + radius + 6, y + 5);
+    }
+  }
+
+  function drawLine(x1, y1, x2, y2, color, width = 2, dash = false) {
+    ctx.beginPath();
+    if (dash) ctx.setLineDash([8, 6]);
+    else ctx.setLineDash([]);
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawAxes(centerX, centerY, scale) {
+    ctx.strokeStyle = '#555a96';
+    ctx.lineWidth = 1;
+
+    // X axis
+    ctx.beginPath();
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(W, centerY);
+    ctx.stroke();
+
+    // Y axis
+    ctx.beginPath();
+    ctx.moveTo(centerX, 0);
+    ctx.lineTo(centerX, H);
+    ctx.stroke();
+
+    ctx.fillStyle = '#7ca0ff';
+    ctx.font = '14px Poppins, sans-serif';
+    ctx.fillText('X', W - 20, centerY - 10);
+    ctx.fillText('Y', centerX + 10, 20);
+
+    ctx.fillStyle = '#8ea6f7';
+    ctx.font = '11px Poppins, sans-serif';
+
+    // Marks from -scaleMax to scaleMax rounded and padded
+    // Calculate numeric range for labels
+    const rangeXPlus = (W - centerX) / scale;
+    const rangeXMinus = centerX / scale;
+    const rangeYPlus = centerY / scale;
+    const rangeYMinus = (H - centerY) / scale;
+
+    // Draw X axis marks
+    for (let i = Math.ceil(-rangeXMinus); i <= Math.floor(rangeXPlus); i++) {
+      if (i === 0) continue; 
+      const x = centerX + i * scale;
+      ctx.fillText(i.toString(), x - 6, centerY + 15);
+      ctx.beginPath();
+      ctx.moveTo(x, centerY - 4);
+      ctx.lineTo(x, centerY + 4);
+      ctx.strokeStyle = '#7c8ccd';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Draw Y axis marks
+    for (let i = Math.ceil(-rangeYMinus); i <= Math.floor(rangeYPlus); i++) {
+      if (i === 0) continue;
+      const y = centerY - i * scale;
+      ctx.fillText(i.toString(), centerX + 8, y + 4);
+      ctx.beginPath();
+      ctx.moveTo(centerX - 4, y);
+      ctx.lineTo(centerX + 4, y);
+      ctx.strokeStyle = '#7c8ccd';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  // Normalize a value to reasonable canvas range to avoid too small scale
+  function normalizeScale(scale) {
+    // Minimum scale 10, maximum 100 pixels per unit
+    if (scale < 10) return 10;
+    if (scale > 100) return 100;
+    return scale;
+  }
+
+  function toCanvasCoords(point, centerX, centerY, scale) {
+    return {
+      x: centerX + point.x * scale,
+      y: centerY - point.y * scale,
+    };
+  }
+
+  function rotatePoint(x, y, cx, cy, thetaDeg) {
+    const theta = (thetaDeg * Math.PI) / 180;
+    const dx = x - cx;
+    const dy = y - cy;
+    const rx = dx * Math.cos(theta) - dy * Math.sin(theta);
+    const ry = dx * Math.sin(theta) + dy * Math.cos(theta);
+    return { x: rx + cx, y: ry + cy };
+  }
+
+  function update() {
+    const p = {
+      x: parseFloat(inputs.x.value),
+      y: parseFloat(inputs.y.value),
+    };
+    const t = {
+      x: parseFloat(inputs.tx.value),
+      y: parseFloat(inputs.ty.value),
+    };
+    const rotAngle = parseFloat(inputs.rotation.value);
+    const rotCenter = {
+      x: parseFloat(inputs.rotCenterX.value),
+      y: parseFloat(inputs.rotCenterY.value),
+    };
+
+    const tP = {
+      x: p.x + t.x,
+      y: p.y + t.y,
+    };
+    const rP = rotatePoint(tP.x, tP.y, rotCenter.x, rotCenter.y, rotAngle);
+
+    // Prepare points array for bounding box calc
+    const points = [p, tP, rP, rotCenter];
+
+    // Calculate bounding box
+    let minX = points[0].x, maxX = points[0].x;
+    let minY = points[0].y, maxY = points[0].y;
+    for (const pt of points) {
+      if (pt.x < minX) minX = pt.x;
+      if (pt.x > maxX) maxX = pt.x;
+      if (pt.y < minY) minY = pt.y;
+      if (pt.y > maxY) maxY = pt.y;
+    }
+
+    // Add margin of ~1 unit
+    minX -= 1;
+    maxX += 1;
+    minY -= 1;
+    maxY += 1;
+
+    // Compute scale to fit all points within canvas (with padding)
+    const padding = 60; // pixels padding
+    const scaleX = (W - padding * 2) / (maxX - minX);
+    const scaleY = (H - padding * 2) / (maxY - minY);
+    let scale = Math.min(scaleX, scaleY);
+    scale = normalizeScale(scale);
+
+    // Calculate centerX and centerY to map bounding box center to canvas center
+    const centerX = W / 2 - ((minX + maxX) / 2) * scale;
+    const centerY = H / 2 + ((minY + maxY) / 2) * scale;
+
+    // Narasi perhitungan
+    let narrative = '';
+    narrative += `Diketahui titik awal P = (${p.x.toFixed(2)}, ${p.y.toFixed(2)})\n`;
+    narrative += `Translasi T = (${t.x.toFixed(2)}, ${t.y.toFixed(2)})\n\n`;
+
+    narrative += `1. Translasi:\n`;
+    narrative += `Titik setelah translasi T' = P + T = (${p.x.toFixed(2)} + ${t.x.toFixed(2)}, ${p.y.toFixed(2)} + ${t.y.toFixed(2)})\n`;
+    narrative += `=> T' = (${tP.x.toFixed(2)}, ${tP.y.toFixed(2)})\n\n`;
+
+    narrative += `2. Rotasi:\n`;
+    narrative += `Sudut rotasi θ = ${rotAngle.toFixed(2)}°\n`;
+    narrative += `Pusat rotasi = (${rotCenter.x.toFixed(2)}, ${rotCenter.y.toFixed(2)})\n\n`;
+
+    narrative += `Langkah hitung:\n`;
+    narrative += `- Geser titik T' ke pusat rotasi: (x - cx, y - cy) = (${(tP.x - rotCenter.x).toFixed(2)}, ${(tP.y - rotCenter.y).toFixed(2)})\n`;
+    narrative += `- Rotasi dengan rumus:\n   x' = (x - cx) * cosθ - (y - cy) * sinθ\n`;
+    narrative += `   y' = (x - cx) * sinθ + (y - cy) * cosθ\n`;
+    narrative += `- Hitung:\n`;
+
+    const radians = (rotAngle * Math.PI) / 180;
+    const cosTheta = Math.cos(radians);
+    const sinTheta = Math.sin(radians);
+    const shiftedX = tP.x - rotCenter.x;
+    const shiftedY = tP.y - rotCenter.y;
+    const rotX = shiftedX * cosTheta - shiftedY * sinTheta;
+    const rotY = shiftedX * sinTheta + shiftedY * cosTheta;
+
+    narrative += `   x' = (${shiftedX.toFixed(2)}) * ${cosTheta.toFixed(4)} - (${shiftedY.toFixed(2)}) * ${sinTheta.toFixed(4)} = ${rotX.toFixed(4)}\n`;
+    narrative += `   y' = (${shiftedX.toFixed(2)}) * ${sinTheta.toFixed(4)} + (${shiftedY.toFixed(2)}) * ${cosTheta.toFixed(4)} = ${rotY.toFixed(4)}\n\n`;
+
+    narrative += `- Geser kembali ke koordinat asli:\n`;
+    narrative += `   R' = (x' + cx, y' + cy) = (${rotX.toFixed(4)} + ${rotCenter.x.toFixed(2)}, ${rotY.toFixed(4)} + ${rotCenter.y.toFixed(2)})\n`;
+    narrative += `=> R' = (${rP.x.toFixed(4)}, ${rP.y.toFixed(4)})\n`;
+
+    document.getElementById('result').textContent = narrative;
+
+    // Visualisasi
+    ctx.clearRect(0, 0, W, H);
+    drawAxes(centerX, centerY, scale);
+
+    const pC = toCanvasCoords(p, centerX, centerY, scale);
+    const tPC = toCanvasCoords(tP, centerX, centerY, scale);
+    const rPC = toCanvasCoords(rP, centerX, centerY, scale);
+    const rotCenterC = toCanvasCoords(rotCenter, centerX, centerY, scale);
+
+    drawCircle(pC.x, pC.y, 7, '#3a9ddf', 'P');
+    drawCircle(tPC.x, tPC.y, 7, '#4caf50', "T'");
+    drawCircle(rPC.x, rPC.y, 7, '#ff9800', "R'");
+
+    ctx.fillStyle = '#dd4444';
+    ctx.fillRect(rotCenterC.x - 6, rotCenterC.y - 6, 12, 12);
+    ctx.fillStyle = '#eecccc';
+    ctx.font = '14px Poppins, sans-serif';
+    ctx.fillText('C', rotCenterC.x + 8, rotCenterC.y + 6);
+
+    drawLine(pC.x, pC.y, tPC.x, tPC.y, '#f2d04f', 3, true);
+    drawLine(tPC.x, tPC.y, rPC.x, rPC.y, '#9c4ff2', 3, true);
+  }
+
+  Object.values(inputs).forEach((input) => input.addEventListener('input', update));
+  update();
+})();
+</script>
+</body>
+</html>

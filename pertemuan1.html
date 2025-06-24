@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pertemuan 1 - Pendahuluan Komputer Grafik</title>
+  <style>
+    /* BASE RESET */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #1e1f26 0%, #4d648d 100%);
+      color: #6b7280;
+      font-size: 18px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 3rem 1rem 4rem;
+      min-height: 100vh;
+    }
+
+    /* Container */
+    div[style*="max-width: 800px"] {
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 2rem;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 20px 40px rgb(0 0 0 / 0.1);
+    }
+
+    /* Heading smaller */
+    h2 {
+      font-size: 1.7rem; /* ~28px */
+      font-weight: 600;
+      color: #1e40af; /* deep blue */
+      margin-bottom: 2.5rem;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      user-select: none;
+      text-align: center;
+      text-shadow: 0 1px 3px rgb(30 64 175 / 0.3);
+    }
+
+    /* Input Group */
+    .input-group {
+      background-color: #f3f4f6;
+      padding: 2.5rem 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgb(30 64 175 / 0.15);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 3rem;
+      align-items: center;
+      margin-bottom: 3.5rem;
+      user-select: none;
+      font-weight: 600;
+      color: #1e40af;
+      justify-content: center;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      white-space: nowrap;
+      user-select: text;
+    }
+
+    input[type="number"] {
+      padding: 0.6rem 1rem;
+      font-size: 1em;
+      border: 2px solid #93c5fd;
+      border-radius: 0.75rem;
+      width: 100px;
+      color: #1e3a8a;
+      font-weight: 600;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      font-variant-numeric: tabular-nums;
+      background: white;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 12px rgb(59 130 246 / 0.6);
+      background-color: #e0f2fe;
+    }
+
+    /* Buttons */
+    button {
+      font-weight: 700;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #2563eb, #1e40af);
+      color: white;
+      border: none;
+      padding: 0.7rem 2.25rem;
+      border-radius: 1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.4s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 5px 15px rgb(30 64 175 / 0.3);
+    }
+    button:hover,
+    button:focus {
+      background: linear-gradient(120deg, #1e40af, #2563eb);
+      outline: none;
+      transform: scale(1.07);
+      box-shadow: 0 10px 25px rgb(37 99 235 / 0.7);
+    }
+    button:active {
+      transform: scale(0.96);
+      box-shadow: none;
+    }
+
+    /* Input coordinates container */
+    #inputTitik {
+      flex-basis: 100%;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: #3b82f6;
+      font-size: 1rem;
+      text-align: center;
+      user-select: text;
+    }
+    #inputTitik input[type="number"] {
+      width: 90px;
+      margin: 0 7px 10px 0;
+      padding: 0.35rem 0.5rem;
+      font-size: 1em;
+      border-radius: 0.75rem;
+      border: 2px solid #93c5fd;
+      transition: border-color 0.3s ease;
+      vertical-align: middle;
+      font-weight: 600;
+      color: #1e3a8a;
+      background: white;
+    }
+    #inputTitik input[type="number"]:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+      outline: none;
+      background-color: #dbeafe;
+    }
+    #inputTitik br {
+      line-height: 1.4;
+    }
+
+    /* Canvas container - center canvas */
+    #canvas-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 3.5rem;
+    }
+    /* Canvas */
+    canvas#pixelCanvas {
+      border-radius: 1rem;
+      box-shadow:
+        0 20px 30px rgb(37 99 235 / 0.15),
+        inset 0 0 15px rgb(37 99 235 / 0.2);
+      border: 3px solid #3b82f6;
+      background-color: #f0f9ff;
+      cursor: crosshair;
+      image-rendering: pixelated;
+      width: 420px;
+      height: 420px;
+      transition: box-shadow 0.3s ease;
+    }
+    canvas#pixelCanvas:hover {
+      box-shadow:
+        0 30px 40px rgb(37 99 235 / 0.4),
+        inset 0 0 25px rgb(37 99 235 / 0.3);
+    }
+
+    /* Output */
+    .output {
+      background-color: #e0e7ff;
+      padding: 2.5rem 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 12px 35px rgb(37 99 235 / 0.25);
+      color: #1e40af;
+      margin-bottom: 3.5rem;
+      font-size: 1rem;
+      user-select: text;
+    }
+    .output strong {
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: #1e3a8a;
+      user-select: none;
+      display: block;
+      margin-bottom: 0.75rem;
+      text-align: center;
+      text-shadow: 0 1px 2px rgb(30 64 175 / 0.25);
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+      margin-top: 1.4rem;
+      font-variant-numeric: tabular-nums;
+      background: #f8fbff;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: inset 0 0 8px rgb(59 130 246 / 0.1);
+      user-select: none;
+    }
+    thead th {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #2563eb;
+      padding: 0.7rem 0;
+      text-align: center;
+      background: #dbeafe;
+      font-variant-numeric: tabular-nums;
+      user-select: none;
+    }
+    tbody tr {
+      background-color: #eff6ff;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s ease;
+    }
+    tbody tr:hover {
+      background-color: #bfdbfe;
+    }
+    tbody td {
+      padding: 0.75rem 0;
+      color: #1e3a8a;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Explanation Panel */
+    .penjelasan-bawah {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border-radius: 1rem;
+      box-shadow: 0 18px 40px rgb(37 99 235 / 0.33);
+      padding: 2.5rem 3rem;
+      color: #1e40af;
+      font-size: 1.15rem;
+      line-height: 1.55;
+      user-select: text;
+      transition: background-color 0.3s ease;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 4rem;
+      font-weight: 500;
+    }
+    .penjelasan-bawah h4 {
+      font-weight: 800;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #1e40af;
+      text-shadow: 0 1px 3px rgb(30 64 175 / 0.3);
+      user-select: none;
+    }
+    .penjelasan-bawah ul {
+      margin-top: 1rem;
+      padding-left: 1.5rem;
+      list-style: disc;
+    }
+    .penjelasan-bawah ul li {
+      margin-bottom: 0.5rem;
+    }
+    .penjelasan-bawah pre {
+      background-color: #93c5fd;
+      color: #1e3a8a;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      font-family: 'Fira Mono', monospace, monospace;
+      overflow-x: auto;
+      font-size: 1rem;
+      margin-top: 1rem;
+      box-shadow: 0 5px 15px rgb(30 64 175 / 0.25);
+      user-select: text;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .input-group {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 2rem 1.5rem;
+      }
+      label {
+        justify-content: center;
+        width: 100%;
+      }
+      input[type="number"] {
+        width: 100%;
+        max-width: 220px;
+      }
+      button {
+        width: 100%;
+        min-width: 0;
+      }
+      canvas#pixelCanvas {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .penjelasan-bawah {
+        padding: 2rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div style="max-width: 800px; margin: 0 auto;" class="container" role="main" aria-label="Pengantar Komputer Grafik">
+    <h2>PERTEMUAN 1 [PENGENALAN GRAFIKA KOMPUTER] - Pengantar Komputer Grafik, Pixel</h2>
+
+    <div class="input-group" role="form" aria-label="Form Input Titik dan Ukuran Sel">
+      <label>Jumlah Titik: <input type="number" id="jumlah" value="3" min="1" aria-required="true"></label>
+      <label>Ukuran Sel (px): <input type="number" id="ukuranSel" value="20" min="1" aria-required="true"></label>
+      <button onclick="generateInput()" aria-label="Buat input titik baru">Buat Input Titik</button>
+      <button onclick="gambarTitik()" aria-label="Hitung dan gambar titik">Hitung & Gambar</button>
+      <div id="inputTitik" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <div id="canvas-container">
+      <canvas id="pixelCanvas" width="420" height="420" aria-label="Kanvas Grid Titik"></canvas>
+    </div>
+
+    <div class="output" aria-live="polite" aria-atomic="true">
+      <strong>Koordinat Titik:</strong>
+      <table id="tabelHasil" aria-describedby="descTabel">
+        <thead><tr><th>No</th><th>X</th><th>Y</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <span id="descTabel" class="sr-only">Tabel berisi nomor titik dan koordinat X dan Y.</span>
+    </div>
+
+    <div class="penjelasan-bawah" id="gridInfo" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("pixelCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function drawGrid(cellSize) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Grid lines
+      ctx.strokeStyle = "#93c5fd"; // soft blue grid
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= canvas.width; x += cellSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= canvas.height; y += cellSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Axis lines - stronger
+      ctx.strokeStyle = "#1e40af"; // deep blue
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, canvas.height / 2); ctx.lineTo(canvas.width, canvas.height / 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height); ctx.stroke();
+
+      // Labels
+      ctx.fillStyle = "#1e40af";
+      ctx.font = "12px 'Inter', Arial, sans-serif";
+      ctx.textBaseline = "top";
+      for (let x = 0; x <= canvas.width - cellSize; x += cellSize) {
+        ctx.fillText(x, x + 2, 2);
+      }
+      for (let y = 0; y <= canvas.height - cellSize; y += cellSize) {
+        ctx.fillText(y, 2, y + 2);
+      }
+    }
+
+    function generateInput() {
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const container = document.getElementById("inputTitik");
+      container.innerHTML = "";
+      for (let i = 0; i < jumlah; i++) {
+        container.innerHTML +=
+          "Titik " + (i + 1) + ": X: " +
+          '<input type="number" id="x' + i + '" value="' + (i * 20 + 100) + '">' +
+          " Y: " +
+          '<input type="number" id="y' + i + '" value="' + (i * 20 + 150) + '"><br>';
+      }
+    }
+
+    function gambarTitik() {
+      const cellSize = parseInt(document.getElementById("ukuranSel").value);
+      drawGrid(cellSize);
+
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const tbody = document.querySelector("#tabelHasil tbody");
+      tbody.innerHTML = "";
+
+      const points = [];
+      ctx.fillStyle = "#2563eb"; // blue points
+
+      for (let i = 0; i < jumlah; i++) {
+        const x = parseInt(document.getElementById("x" + i).value);
+        const y = parseInt(document.getElementById("y" + i).value);
+        points.push({x, y});
+        ctx.fillRect(x, y, 8, 8);
+        const row = document.createElement("tr");
+        row.innerHTML = "<td>" + (i + 1) + "</td><td>" + x + "</td><td>" + y + "</td>";
+        tbody.appendChild(row);
+      }
+
+      // Draw lines connecting points
+      if (points.length > 1) {
+        ctx.strokeStyle = "#f97316"; // bright orange
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x + 4, points[0].y + 4); // center first point
+        for (let i = 1; i < points.length; i++) {
+          ctx.lineTo(points[i].x + 4, points[i].y + 4);
+        }
+        ctx.stroke();
+      }
+
+      let penjelasanGrid = "<h4>Konversi Otomatis ke Grid (ukuran sel " + cellSize + "px)</h4><ul>";
+      for (let i = 0; i < jumlah; i++) {
+        const x = parseInt(document.getElementById("x" + i).value);
+        const y = parseInt(document.getElementById("y" + i).value);
+        const kolom = x / cellSize;
+        const baris = y / cellSize;
+
+        const kolomBawah = Math.floor(kolom);
+        const kolomAtas = Math.ceil(kolom);
+        const kolomKeterangan = (kolom % 1 === 0)
+          ? "di kolom ke-" + kolom
+          : "antara kolom ke-" + kolomBawah + " dan ke-" + kolomAtas;
+
+        const barisBawah = Math.floor(baris);
+        const barisAtas = Math.ceil(baris);
+        const barisKeterangan = (baris % 1 === 0)
+          ? "di baris ke-" + baris
+          : "antara baris ke-" + barisBawah + " dan ke-" + barisAtas;
+
+        penjelasanGrid += "<li>Titik " + (i + 1) + ": X=" + x + ", Y=" + y + " ⇒ Kolom ke-" + kolom.toFixed(2) + ", Baris ke-" + baris.toFixed(2) +
+          " (" + kolomKeterangan + ", " + barisKeterangan + ")</li>";
+      }
+      penjelasanGrid += "</ul>";
+
+      if (jumlah > 0) {
+        const x1 = parseInt(document.getElementById("x0").value);
+        const y1 = parseInt(document.getElementById("y0").value);
+        const kolom1 = x1 / cellSize;
+        const baris1 = y1 / cellSize;
+
+        const kolomKeterangan = (kolom1 % 1 === 0)
+          ? "di kolom ke-" + kolom1
+          : "antara kolom ke-" + Math.floor(kolom1) + " dan ke-" + Math.ceil(kolom1);
+        const barisKeterangan = (baris1 % 1 === 0)
+          ? "di baris ke-" + baris1
+          : "antara baris ke-" + Math.floor(baris1) + " dan ke-" + Math.ceil(baris1);
+
+        const penjelasanTetap =
+          "<h4>Contoh Perhitungan Detail (Misalnya Titik 1):</h4>" +
+          "Misal kamu memasukkan koordinat titik:" +
+          "<ul>" +
+          "<li><strong>X = " + x1 + "</strong></li>" +
+          "<li><strong>Y = " + y1 + "</strong></li>" +
+          "</ul>" +
+          "Maka pada JavaScript akan dijalankan:" +
+          "<pre>ctx.fillRect(" + x1 + ", " + y1 + ", 8, 8);</pre>" +
+
+          "<strong>Penjelasan:</strong>" +
+          "<ul>" +
+          "<li><code>ctx.fillRect(x, y, width, height)</code> menggambar kotak (titik visual).</li>" +
+          "<li><code>x = " + x1 + "</code> → " + x1 + " piksel dari kiri canvas.</li>" +
+          "<li><code>y = " + y1 + "</code> → " + y1 + " piksel dari atas canvas.</li>" +
+          "<li><code>8,8</code> → ukuran titik agar jelas dan mudah dilihat.</li>" +
+          "</ul>" +
+
+          "<strong>Contoh Perhitungan Grid:</strong><br>" +
+          "Ukuran sel = " + cellSize + " piksel:<br>" +
+          "Kolom ke = " + x1 + " ÷ " + cellSize + " = " + kolom1.toFixed(2) + " (" + kolomKeterangan + ")<br>" +
+          "Baris ke = " + y1 + " ÷ " + cellSize + " = " + baris1.toFixed(2) + " (" + barisKeterangan + ")<br><br>";
+
+        document.getElementById("gridInfo").innerHTML = penjelasanTetap + penjelasanGrid;
+      }
+    }
+
+    // Initialize default inputs and grid on load
+    generateInput();
+    drawGrid(parseInt(document.getElementById("ukuranSel").value));
+  </script>
+</body>
+</html>

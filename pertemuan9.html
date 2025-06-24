@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dilatasi Transformasi - Mirror Y over X-axis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1f29;
+    color: #e0e0e0;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  h1 {
+    font-weight: 600;
+    margin-bottom: 0.25em;
+    color: #61dafb;
+    text-align: center;
+  }
+  p.description {
+    max-width: 600px;
+    font-size: 1rem;
+    color: #a0a0a0;
+    text-align: center;
+    margin-bottom: 1.5em;
+  }
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 900px;
+    width: 100%;
+    justify-content: center;
+  }
+  .input-section, .calc-section {
+    background: #2f3142;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #385973a0;
+    flex: 1 1 300px;
+    min-width: 280px;
+  }
+  .input-section h2, .calc-section h2 {
+    margin-top: 0;
+    color: #56ccf2;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    margin-top: 1rem;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #485569;
+    background: #23243a;
+    color: #e0e0e0;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  input[type="number"]:focus {
+    outline: none;
+    border-color: #61dafb;
+    box-shadow: 0 0 6px #61dafb66;
+  }
+  .calc-section pre {
+    background: #161824;
+    padding: 1rem;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    font-size: 1rem;
+    line-height: 1.4;
+    user-select: text;
+  }
+
+  .canvas-section {
+    flex: 1 1 400px;
+    min-width: 380px;
+    background: #2f3142;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 0 25px #2a98f0a8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #canvasContainer {
+    background: #161824;
+    border: 2px solid #61dafb99;
+    border-radius: 12px;
+    width: 380px;
+    height: 380px;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    margin: 0 auto;
+  }
+  .legend {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #89b8f8;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .color-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+  }
+  .orig-point {
+    background: #f28e1c;
+  }
+  .trans-point {
+    background: #1cc7f2;
+  }
+  .mirror-line {
+    background: #61dafb;
+    width: 40px;
+    height: 4px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 826px) {
+    .container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .canvas-section {
+      min-width: 320px;
+      width: 80vw;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Pertemuan 9 - Dilatasi Transformasi: Mirror Y over X-axis</h1>
+<p class="description">
+  Transformasi ini membalik nilai y pada koordinat titik, sedangkan nilai x tetap sama. Ilustrasi di bawah menampilkan titik asli dan titik hasil transformasi dengan cermin pada sumbu-x.
+  Masukkan nilai x dan y, dan lihat perhitungan beserta perubahan posisi pada grafik.
+</p>
+
+<div class="container">
+  <div class="input-section" aria-label="Input koordinat">
+    <h2>Masukkan Koordinat Titik</h2>
+    <label for="inputX">Nilai x:</label>
+    <input type="number" id="inputX" value="3" step="any" />
+    <label for="inputY">Nilai y:</label>
+    <input type="number" id="inputY" value="4" step="any" />
+  </div>
+
+  <div class="canvas-section" aria-label="Ilustrasi grafik transformasi">
+    <h2>Ilustrasi Grafik</h2>
+    <div id="canvasContainer">
+      <canvas id="graphCanvas" width="380" height="380" aria-label="Grafik koordinat"></canvas>
+    </div>
+    <div class="legend" aria-label="Legenda titik dan garis">
+      <span><div class="color-box orig-point"></div> Titik Asli (x, y)</span>
+      <span><div class="color-box trans-point"></div> Titik Transformasi (x, -y)</span>
+      <span><div class="color-box mirror-line"></div> Garis Cermin (Sumbu-X)</span>
+    </div>
+  </div>
+
+  <div class="calc-section" aria-label="Perhitungan transformasi">
+    <h2>Perhitungan Transformasi</h2>
+    <pre id="calcNarrative" tabindex="0"></pre>
+  </div>
+</div>
+
+<script>
+  const inputX = document.getElementById('inputX');
+  const inputY = document.getElementById('inputY');
+  const calcNarrative = document.getElementById('calcNarrative');
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const originX = width / 2;
+  const originY = height / 2;
+
+  // Minimum and maximum scale constraints (pixels per unit)
+  const SCALE_MIN = 10;
+  const SCALE_MAX = 45;
+
+  function drawAxes() {
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    // X axis
+    ctx.moveTo(0, originY);
+    ctx.lineTo(width, originY);
+    // Y axis
+    ctx.moveTo(originX, 0);
+    ctx.lineTo(originX, height);
+    ctx.stroke();
+
+    // Arrows
+    ctx.fillStyle = '#61dafb';
+    // X arrow
+    ctx.beginPath();
+    ctx.moveTo(width - 12, originY - 6);
+    ctx.lineTo(width, originY);
+    ctx.lineTo(width - 12, originY + 6);
+    ctx.fill();
+    // Y arrow
+    ctx.beginPath();
+    ctx.moveTo(originX - 6, 12);
+    ctx.lineTo(originX, 0);
+    ctx.lineTo(originX + 6, 12);
+    ctx.fill();
+
+    // Axis labels
+    ctx.fillStyle = '#a0cfff';
+    ctx.font = '14px Poppins, sans-serif';
+    ctx.fillText('X', width - 18, originY - 8);
+    ctx.fillText('Y', originX + 8, 18);
+
+    // Draw grid lines and labels depending on scale
+    ctx.strokeStyle = '#38597355';
+    ctx.lineWidth = 1;
+    ctx.font = '10px Poppins, sans-serif';
+    ctx.fillStyle = '#627d9e';
+
+    // Determine grid step in units for labels (adjusted for scale)
+    let stepUnits = 1;
+    if (scale < 20) stepUnits = 2;
+    if (scale < 12) stepUnits = 5;
+
+    // Vertical grid lines and labels
+    for (let u = Math.ceil(-originX/scale); u <= Math.floor((width - originX)/scale); u++) {
+      if (u % stepUnits !== 0) continue;
+      let x = originX + u * scale;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+      if (u !== 0) ctx.fillText(u, x - 6, originY + 15);
+    }
+    // Horizontal grid lines and labels
+    for (let u = Math.ceil(-originY/scale); u <= Math.floor((height - originY)/scale); u++) {
+      if (u % stepUnits !== 0) continue;
+      let y = originY + u * scale;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+      if (u !== 0) ctx.fillText(-u, originX + 6, y + 3);
+    }
+  }
+
+  function drawPoint(x, y, color) {
+    const canvasX = originX + x * scale;
+    const canvasY = originY - y * scale;
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 5;
+    ctx.arc(canvasX, canvasY, 8, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Draw coordinates label
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = '13px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`(${x}, ${y})`, canvasX, canvasY - 12);
+  }
+
+  function drawMirrorLine() {
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    // mirror line y=0 (x-axis)
+    ctx.moveTo(0, originY);
+    ctx.lineTo(width, originY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, width, height);
+  }
+
+  // scale variable updated based on input
+  let scale = 30;
+
+  function update() {
+    let x = parseFloat(inputX.value);
+    let y = parseFloat(inputY.value);
+
+    if (isNaN(x) || isNaN(y)) {
+      calcNarrative.textContent = 'Mohon masukkan nilai numerik yang valid untuk x dan y.';
+      clearCanvas();
+      return;
+    }
+
+    // Calculate max absolute coordinate for scaling
+    const transY = -y;
+    const maxCoord = Math.max(Math.abs(x), Math.abs(y), Math.abs(transY));
+
+    // Update scale so maxCoord fits comfortably in canvas (about 85% of half width/height)
+    if (maxCoord === 0) {
+      scale = SCALE_MAX; // default max scale if zero input
+    } else {
+      let maxPixelsNeeded = maxCoord * SCALE_MAX;
+      // We want maxPixelsNeeded <= 85% of half canvas size
+      let maxPixelsAllowed = originX * 0.85;
+      scale = Math.min(SCALE_MAX, Math.max(SCALE_MIN, maxPixelsAllowed / maxCoord));
+    }
+
+    clearCanvas();
+    drawAxes();
+    drawMirrorLine();
+
+    // Draw original point
+    drawPoint(x, y, '#f28e1c');
+    // Draw transformed point
+    drawPoint(x, transY, '#1cc7f2');
+
+    // Line connecting original and transformed point
+    ctx.strokeStyle = '#56ccf2aa';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(originX + x * scale, originY - y * scale);
+    ctx.lineTo(originX + x * scale, originY - transY * scale);
+    ctx.stroke();
+
+    // Update calculation narrative
+    const narrative = `
+Transformasi Dilatasi untuk Titik (x, y):
+
+Titik awal: (${x}, ${y})
+
+Transformasi yang dilakukan:
+- Nilai x tetap sama: x' = ${x}
+- Nilai y dibalik tanda (mirror terhadap sumbu-x): y' = -(${y}) = ${transY}
+
+Jadi, titik hasil transformasi adalah (${x}, ${transY}).
+
+Interpretasi grafis:
+- Garis putus-putus biru menandakan cermin pada sumbu-x (y=0).
+- Titik oranye menunjukkan posisi awal.
+- Titik biru menunjukkan posisi setelah transformasi.
+    `.trim();
+
+    calcNarrative.textContent = narrative;
+  }
+
+  inputX.addEventListener('input', update);
+  inputY.addEventListener('input', update);
+
+  update(); // initial draw
+</script>
+
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo Viewing dan Clipping dalam Grafika Komputer</title>
+<style>
+  body {
+    background: #1e1e2f;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  h1 {
+    color: #61dafb;
+    margin-bottom: 0.25em;
+    user-select: none;
+  }
+  #canvas-container {
+    position: relative;
+    border: 2px solid #61dafb;
+    border-radius: 8px;
+    background: #292a3a;
+    width: 820px;
+    height: 620px;
+    margin-top: 20px;
+    box-shadow:
+      0 0 12px #61dafb88,
+      inset 0 0 16px #61dafb55;
+  }
+  canvas {
+    display: block;
+    background: linear-gradient(90deg, #111122 0%, #0c0c14 100%);
+    border-radius: 8px;
+    width: 800px;
+    height: 600px;
+    box-shadow:
+      inset 0 0 12px #222244;
+  }
+  .controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  button {
+    background: #61dafb;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #111122;
+    box-shadow: 0 3px 7px rgba(97, 218, 251, 0.6);
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:hover {
+    background: #21a1f1;
+  }
+  .legend {
+    margin-top: 20px;
+    max-width: 820px;
+    background: #222238;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: #c0c0c0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    user-select: none;
+  }
+  .legend b {
+    color: #61dafb;
+  }
+  .description {
+    margin-top: 12px;
+    max-width: 820px;
+    background: #222238;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: #c0c0c0;
+    font-size: 1rem;
+    line-height: 1.5;
+    user-select: none;
+    min-height: 3.6em;
+  }
+  .footer-link {
+    margin-top: 15px;
+    color: #61dafb;
+    font-size: 0.8rem;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+  <h1>Pertemuan 10 - Viewing dan Clipping</h1>
+  <div>Konsep Viewing dan Clipping dalam Grafika Komputer</div>
+
+  <div id="canvas-container">
+    <canvas id="canvas" width="800" height="600"></canvas>
+  </div>
+
+  <div class="controls">
+    <button id="btnViewingStructure">Struktur Viewing</button>
+    <!-- Tombol Transformasi Viewing dihilangkan -->
+    <button id="btnWindow">Window (Area Tampilan)</button>
+    <button id="btnLineClipping">Line Clipping (Pemotongan Garis)</button>
+    <button id="btnPolygonClipping">Polygon Clipping (Pemotongan Polygon)</button>
+    <button id="btnCurveClipping">Curve Clipping (Pemotongan Kurva)</button>
+    <button id="btnReset">Reset Kanvas</button>
+  </div>
+
+  <div class="description" id="descriptionBox">
+    Tekan tombol untuk melihat demonstrasi terkait Viewing dan Clipping.
+  </div>
+
+  <div class="legend" id="legendBox">
+    <b>Legenda:</b>
+    <ul>
+      <li><span style="color:#4caf50;">Hijau</span> - Bentuk asli / objek</li>
+      <li><span style="color:#f44336;">Merah</span> - Bagian di luar window</li>
+      <li><span style="color:#61dafb;">Biru</span> - Window (area tampilan / viewport)</li>
+      <li><span style="color:#ffff00;">Kuning</span> - Bagian hasil clipping / transformasi</li>
+      <li><span style="color:#ffa500;">Oranye</span> - Koordinat / garis bantu dan teks</li>
+    </ul>
+  </div>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const descriptionBox = document.getElementById('descriptionBox');
+  const legendBox = document.getElementById('legendBox');
+
+  // Common window rectangle (viewport)
+  const windowRect = { xMin: 200, yMin: 150, xMax: 600, yMax: 450 };
+
+  // Utility functions -------------------------------------------------------
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Draw lines with color and optional dash pattern
+  function drawLine(x1, y1, x2, y2, color = '#4caf50', dash = []) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Draw polygon from array of points, optionally fill and dash
+  function drawPolygon(points, color = '#4caf50', fill = false, fillColor = '', dash = []) {
+    if (points.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    points.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    if (fill) {
+      ctx.fillStyle = fillColor || color;
+      ctx.fill();
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Draw cubic bezier curve with 4 control points
+  function drawBezierCurve(p0, p1, p2, p3, color = '#4caf50', dash = []) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    ctx.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Draw grid with specified spacing and color
+  function drawGrid(spacing = 40, color = 'rgba(100,100,150,0.15)', xStart = 0, xEnd = canvas.width, yStart = 0, yEnd = canvas.height) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    for(let x = xStart; x <= xEnd; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, yStart);
+      ctx.lineTo(x, yEnd);
+      ctx.stroke();
+    }
+    for(let y = yStart; y <= yEnd; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(xStart, y);
+      ctx.lineTo(xEnd, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Draw text with color and font
+  function drawText(text, x, y, color = '#ffa500', font='12px Verdana') {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = font;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  // Draw circle with stroke or fill
+  function drawCircle(x, y, radius, color = '#4caf50', fill = false) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2*Math.PI);
+    if (fill) ctx.fill();
+    else ctx.stroke();
+    ctx.restore();
+  }
+
+  // ------------------ WINDOW DRAWING --------------------
+
+  // Draw window boundary with glow, dashed
+  function drawWindowBoundary() {
+    ctx.save();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#61dafb';
+    ctx.shadowColor = '#61dafbcc';
+    ctx.shadowBlur = 18;
+    ctx.setLineDash([12,6]);
+    const w = windowRect.xMax - windowRect.xMin;
+    const h = windowRect.yMax - windowRect.yMin;
+    ctx.strokeRect(windowRect.xMin, windowRect.yMin, w, h);
+
+    // Label
+    ctx.fillStyle = '#61dafb';
+    ctx.font = '20px Verdana';
+    ctx.fillText('Window (Area Tampilan)', windowRect.xMin + 12, windowRect.yMin + 28);
+
+    ctx.restore();
+  }
+
+  // Overlay outside window with semi-transparent black for emphasis
+  function drawOutsideWindowOverlay() {
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    const {xMin, yMin, xMax, yMax} = windowRect;
+
+    // Left
+    ctx.fillRect(0, 0, xMin, canvas.height);
+    // Right
+    ctx.fillRect(xMax, 0, canvas.width - xMax, canvas.height);
+    // Top
+    ctx.fillRect(xMin, 0, xMax - xMin, yMin);
+    // Bottom
+    ctx.fillRect(xMin, yMax, xMax - xMin, canvas.height - yMax);
+
+    ctx.restore();
+  }
+
+  // Example objects drawn: green inside window, red outside window
+  function drawExampleObjects() {
+    ctx.save();
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#44ff44bb';
+    ctx.shadowBlur = 12;
+
+    // Rectangle partly inside and partly outside (green lines drawn fully, overlay dims outside parts)
+    ctx.strokeStyle = '#4caf50'; // green
+    ctx.strokeRect(100, 100, 250, 200);
+
+    // Circle completely outside window - red
+    ctx.strokeStyle = '#f44336'; // red
+    ctx.beginPath();
+    ctx.arc(650, 350, 90, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // ------------------ DEMONSTRATIONS ------------------
+
+  // Viewing Structure illustration
+  function drawViewingStructure() {
+    clearCanvas();
+
+    // Draw WCS grid with coords
+    drawGrid(40, 'rgba(100,100,150,0.2)', 50, 350, 50, 550);
+    ctx.strokeStyle = '#aaaaff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(50, 50, 300, 500); // WCS box
+    drawText('Sistem Koordinat Dunia (World Coordinates)', 52, 45);
+
+    // Draw viewport rectangle on right
+    const vp = {xMin: 450, yMin: 150, xMax: 750, yMax: 450};
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10,6]);
+    ctx.strokeRect(vp.xMin, vp.yMin, vp.xMax - vp.xMin, vp.yMax - vp.yMin);
+    ctx.fillStyle = '#61dafb';
+    ctx.font = '18px Verdana';
+    ctx.fillText('Viewport', vp.xMin + 10, vp.yMin - 10);
+
+    // Draw viewing window inside WCS as smaller rectangle
+    const vw = {xMin: 150, yMin: 200, xMax: 300, yMax: 400};
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([4,4]);
+    ctx.strokeRect(vw.xMin, vw.yMin, vw.xMax - vw.xMin, vw.yMax - vw.yMin);
+    ctx.fillStyle = '#ffff00';
+    ctx.font = '16px Verdana';
+    ctx.fillText('Window (Jendela Tampilan)', vw.xMin + 5, vw.yMin - 8);
+
+    // Draw arrow from WCS window to viewport (transformation)
+    const arrowStartX = vw.xMax + 25;
+    const arrowStartY = (vw.yMin + vw.yMax)/2;
+    const arrowEndX = vp.xMin - 25;
+    const arrowEndY = (vp.yMin + vp.yMax)/2;
+
+    drawArrow(arrowStartX, arrowStartY, arrowEndX, arrowEndY, '#ffa500');
+
+    drawText('Transformasi Viewing', arrowStartX + 20, arrowStartY - 10, '#ffa500', '14px Verdana');
+
+    // Draw labeled axes in WCS
+    drawCoordinateAxes(50,50,300,500, 'WCS');
+
+    // Draw labeled axes in Viewport
+    drawCoordinateAxes(vp.xMin, vp.yMin, vp.xMax - vp.xMin, vp.yMax - vp.yMin, 'Viewport');
+
+    // Show a sample shape in WCS window area
+    ctx.save();
+    ctx.strokeStyle = '#4caf50';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(vw.xMin + 20, vw.yMax - 30);
+    ctx.lineTo(vw.xMin + 80, vw.yMax - 100);
+    ctx.lineTo(vw.xMin + 130, vw.yMax - 60);
+    ctx.lineTo(vw.xMin + 90, vw.yMax - 10);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    // Draw the same shape transformed as a yellow polygon inside viewport (scaled)
+    const scaleX = (vp.xMax - vp.xMin) / (vw.xMax - vw.xMin);
+    const scaleY = (vp.yMax - vp.yMin) / (vw.yMax - vw.yMin);
+
+    // Transform polygon point function
+    function transformPoint(p) {
+      return {
+        x: vp.xMin + (p.x - vw.xMin) * scaleX,
+        y: vp.yMin + (p.y - vw.yMin) * scaleY
+      };
+    }
+
+    const wcsShapePoints = [
+      {x: vw.xMin + 20, y: vw.yMax - 30},
+      {x: vw.xMin + 80, y: vw.yMax - 100},
+      {x: vw.xMin + 130, y: vw.yMax - 60},
+      {x: vw.xMin + 90, y: vw.yMax - 10}
+    ];
+
+    const vpShapePoints = wcsShapePoints.map(transformPoint);
+
+    drawPolygon(vpShapePoints, '#ffff00', true, 'rgba(255,255,0,0.4)', []);
+  }
+
+  // Draw axes with labels inside given rectangle area
+  function drawCoordinateAxes(x, y, width, height, label) {
+    ctx.save();
+    ctx.strokeStyle = '#ffa500';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    // x-axis
+    ctx.beginPath();
+    ctx.moveTo(x, y + height);
+    ctx.lineTo(x + width, y + height);
+    ctx.stroke();
+    drawText('X', x + width - 15, y + height - 5, '#ffa500');
+
+    // y-axis
+    ctx.beginPath();
+    ctx.moveTo(x, y + height);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    drawText('Y', x + 5, y + 15, '#ffa500');
+
+    // Label
+    drawText(label, x + 8, y + 18, '#ffa500', 'bold 14px Verdana');
+    ctx.restore();
+  }
+
+  // Draw arrow from (x1,y1) to (x2,y2) with color
+  function drawArrow(x1, y1, x2, y2, color = '#aaa') {
+    const headLength = 12;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headLength * Math.cos(angle - Math.PI / 6), y2 - headLength * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headLength * Math.cos(angle + Math.PI / 6), y2 - headLength * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // Cohen-Sutherland line clipping constants
+  const INSIDE = 0; //0000
+  const LEFT = 1;   //0001
+  const RIGHT = 2;  //0010
+  const BOTTOM = 4; //0100
+  const TOP = 8;    //1000
+
+  function computeOutCode(x, y, rect) {
+    let code = INSIDE;
+    if (x < rect.xMin) code |= LEFT;
+    else if (x > rect.xMax) code |= RIGHT;
+    if (y < rect.yMin) code |= TOP;
+    else if (y > rect.yMax) code |= BOTTOM;
+    return code;
+  }
+
+  function cohenSutherlandClip(x0, y0, x1, y1, rect) {
+    let outcode0 = computeOutCode(x0, y0, rect);
+    let outcode1 = computeOutCode(x1, y1, rect);
+    let accept = false;
+
+    while (true) {
+      if (!(outcode0 | outcode1)) {
+        accept = true;
+        break;
+      } else if (outcode0 & outcode1) {
+        break;
+      } else {
+        let x, y;
+        let outcodeOut = outcode0 !== 0 ? outcode0 : outcode1;
+
+        if (outcodeOut & TOP) {
+          x = x0 + (x1 - x0) * (rect.yMin - y0) / (y1 - y0);
+          y = rect.yMin;
+        } else if (outcodeOut & BOTTOM) {
+          x = x0 + (x1 - x0) * (rect.yMax - y0) / (y1 - y0);
+          y = rect.yMax;
+        } else if (outcodeOut & RIGHT) {
+          y = y0 + (y1 - y0) * (rect.xMax - x0) / (x1 - x0);
+          x = rect.xMax;
+        } else if (outcodeOut & LEFT) {
+          y = y0 + (y1 - y0) * (rect.xMin - x0) / (x1 - x0);
+          x = rect.xMin;
+        }
+
+        if (outcodeOut === outcode0) {
+          x0 = x;
+          y0 = y;
+          outcode0 = computeOutCode(x0, y0, rect);
+        } else {
+          x1 = x;
+          y1 = y;
+          outcode1 = computeOutCode(x1, y1, rect);
+        }
+      }
+    }
+    if (accept) return { x0, y0, x1, y1 };
+    return null;
+  }
+
+  // Sutherland-Hodgman polygon clipping
+  function clipPolygonEdge(points, edge) {
+    const { xMin, yMin, xMax, yMax } = windowRect;
+    let newPoints = [];
+    for (let i = 0; i < points.length; i++) {
+      let curr = points[i];
+      let prev = points[(i + points.length - 1) % points.length];
+
+      let insideCurr = false;
+      let insidePrev = false;
+
+      switch(edge) {
+        case 'left':
+          insideCurr = curr.x >= xMin;
+          insidePrev = prev.x >= xMin;
+          break;
+        case 'right':
+          insideCurr = curr.x <= xMax;
+          insidePrev = prev.x <= xMax;
+          break;
+        case 'top':
+          insideCurr = curr.y >= yMin;
+          insidePrev = prev.y >= yMin;
+          break;
+        case 'bottom':
+          insideCurr = curr.y <= yMax;
+          insidePrev = prev.y <= yMax;
+          break;
+      }
+
+      if (insideCurr) {
+        if (!insidePrev) {
+          const inter = intersection(prev, curr, edge);
+          if (inter) newPoints.push(inter);
+        }
+        newPoints.push(curr);
+      } else if (insidePrev) {
+        const inter = intersection(prev, curr, edge);
+        if (inter) newPoints.push(inter);
+      }
+    }
+    return newPoints;
+  }
+
+  function intersection(p1, p2, edge) {
+    const { xMin, yMin, xMax, yMax } = windowRect;
+    let x, y;
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+
+    if (dx === 0 && dy === 0) return null;
+
+    switch(edge) {
+      case 'left':
+        x = xMin;
+        y = p1.y + dy * (xMin - p1.x) / dx;
+        if (y >= yMin && y <= yMax) return { x, y };
+        break;
+      case 'right':
+        x = xMax;
+        y = p1.y + dy * (xMax - p1.x) / dx;
+        if (y >= yMin && y <= yMax) return { x, y };
+        break;
+      case 'top':
+        y = yMin;
+        x = p1.x + dx * (yMin - p1.y) / dy;
+        if (x >= xMin && x <= xMax) return { x, y };
+        break;
+      case 'bottom':
+        y = yMax;
+        x = p1.x + dx * (yMax - p1.y) / dy;
+        if (x >= xMin && x <= xMax) return { x, y };
+        break;
+    }
+    return null;
+  }
+
+  function sutherlandHodgmanClip(polygon) {
+    let clippedPolygon = polygon;
+    ['left', 'right', 'top', 'bottom'].forEach(edge => {
+      clippedPolygon = clipPolygonEdge(clippedPolygon, edge);
+    });
+    return clippedPolygon;
+  }
+
+  // Curve clipping - recursive subdivision of cubic bezier curves
+  function getCurveBoundingBox(p0, p1, p2, p3) {
+    const xs = [p0.x, p1.x, p2.x, p3.x];
+    const ys = [p0.y, p1.y, p2.y, p3.y];
+    return {
+      xMin: Math.min(...xs),
+      yMin: Math.min(...ys),
+      xMax: Math.max(...xs),
+      yMax: Math.max(...ys)
+    };
+  }
+
+  function clipBezierCurve(p0, p1, p2, p3, rect, depth = 0) {
+    const maxDepth = 10;
+    const bbox = getCurveBoundingBox(p0, p1, p2, p3);
+
+    if (bbox.xMax < rect.xMin || bbox.xMin > rect.xMax || bbox.yMax < rect.yMin || bbox.yMin > rect.yMax) {
+      return [];
+    }
+
+    if ((bbox.xMin >= rect.xMin && bbox.xMax <= rect.xMax && bbox.yMin >= rect.yMin && bbox.yMax <= rect.yMax) || depth >= maxDepth) {
+      return [{p0, p1, p2, p3}];
+    }
+
+    const midPoints = deCasteljauSubdivision(p0, p1, p2, p3);
+
+    return [
+      ...clipBezierCurve(midPoints.left[0], midPoints.left[1], midPoints.left[2], midPoints.left[3], rect, depth + 1),
+      ...clipBezierCurve(midPoints.right[0], midPoints.right[1], midPoints.right[2], midPoints.right[3], rect, depth + 1)
+    ];
+  }
+
+  function deCasteljauSubdivision(p0, p1, p2, p3) {
+    const p01 = midpoint(p0, p1);
+    const p12 = midpoint(p1, p2);
+    const p23 = midpoint(p2, p3);
+    const p012 = midpoint(p01, p12);
+    const p123 = midpoint(p12, p23);
+    const p0123 = midpoint(p012, p123);
+    return {
+      left: [p0, p01, p012, p0123],
+      right: [p0123, p123, p23, p3]
+    };
+  }
+
+  function midpoint(a, b) {
+    return { x: (a.x + b.x)/2, y: (a.y + b.y)/2 };
+  }
+
+  // Window demo (area viewport)
+  function drawWindowDemo() {
+    clearCanvas();
+    drawGrid(40, 'rgba(100,100,150,0.15)');
+    drawExampleObjects();
+    drawOutsideWindowOverlay();
+    drawWindowBoundary();
+    descriptionBox.textContent = "Window (Area Tampilan): Area viewport dengan efek visual dan objek yang dibatasi tampilannya.";
+  }
+
+  // Line clipping demo
+  const exampleLines = [
+    { x0: 100, y0: 100, x1: 700, y1: 500 },
+    { x0: 300, y0: 100, x1: 300, y1: 550 },
+    { x0: 50, y0: 400, x1: 750, y1: 400 },
+    { x0: 550, y0: 100, x1: 150, y1: 500 }
+  ];
+  function drawLineClippingDemo() {
+    clearCanvas();
+    drawWindowBoundary();
+
+    exampleLines.forEach(line => {
+      // Original line outside window - red dashed
+      drawLine(line.x0, line.y0, line.x1, line.y1, '#f44336', [6,4]);
+
+      // Clipped line inside window - yellow solid
+      const clipped = cohenSutherlandClip(line.x0, line.y0, line.x1, line.y1, windowRect);
+      if (clipped) {
+        drawLine(clipped.x0, clipped.y0, clipped.x1, clipped.y1, '#ffff00');
+      }
+    });
+    descriptionBox.textContent = "Line Clipping: Memotong garis agar hanya bagian dalam window yang ditampilkan.";
+  }
+
+  // Polygon clipping demo
+  const polygonPoints = [
+    {x: 150, y: 200},
+    {x: 350, y: 100},
+    {x: 500, y: 230},
+    {x: 620, y: 400},
+    {x: 400, y: 480},
+    {x: 180, y: 450}
+  ];
+  function drawPolygonClippingDemo() {
+    clearCanvas();
+    drawWindowBoundary();
+
+    // Original polygon - green dashed
+    drawPolygon(polygonPoints, '#4caf50', false, '', [6,4]);
+
+    // Clipped polygon - yellow filled and stroke
+    const clippedPolygon = sutherlandHodgmanClip(polygonPoints);
+    if (clippedPolygon.length > 0) {
+      drawPolygon(clippedPolygon, '#ffff00', true, 'rgba(255,255,0,0.4)');
+      drawPolygon(clippedPolygon, '#ffff00', false);
+    }
+    descriptionBox.textContent = "Polygon Clipping: Memotong polygon agar hanya bagian dalam window yang terlihat.";
+  }
+
+  // Curve clipping demo
+  const curvePoints = [
+    {x: 150, y: 350},
+    {x: 250, y: 150},
+    {x: 550, y: 550},
+    {x: 650, y: 250}
+  ];
+  function drawCurveClippingDemo() {
+    clearCanvas();
+    drawWindowBoundary();
+
+    // Original curve - green dashed
+    drawBezierCurve(curvePoints[0], curvePoints[1], curvePoints[2], curvePoints[3], '#4caf50', [8,6]);
+
+    // Clipped curve segments - yellow solid
+    const clippedSegments = clipBezierCurve(curvePoints[0], curvePoints[1], curvePoints[2], curvePoints[3], windowRect);
+    clippedSegments.forEach(seg => {
+      drawBezierCurve(seg.p0, seg.p1, seg.p2, seg.p3, '#ffff00');
+    });
+    descriptionBox.textContent = "Curve Clipping: Memotong kurva Bézier agar hanya bagian dalam window yang muncul.";
+  }
+
+  // Init demo to show viewing structure by default
+  function init() {
+    drawViewingStructure();
+    descriptionBox.textContent =
+      "Struktur Viewing: Menjelaskan sistem koordinat dunia, window, viewport, dan transformasi viewing.";
+  }
+
+  // Button event handlers
+  document.getElementById('btnViewingStructure').addEventListener('click', () => {
+    drawViewingStructure();
+    descriptionBox.textContent =
+      "Struktur Viewing: Menjelaskan sistem koordinat dunia, window (jendela tampilan), viewport, dan fungsi transformasi viewing.";
+  });
+
+  document.getElementById('btnWindow').addEventListener('click', () => {
+    drawWindowDemo();
+  });
+
+  document.getElementById('btnLineClipping').addEventListener('click', () => {
+    drawLineClippingDemo();
+  });
+
+  document.getElementById('btnPolygonClipping').addEventListener('click', () => {
+    drawPolygonClippingDemo();
+  });
+
+  document.getElementById('btnCurveClipping').addEventListener('click', () => {
+    drawCurveClippingDemo();
+  });
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    clearCanvas();
+    descriptionBox.textContent = "Kanvas dibersihkan. Tekan tombol untuk menampilkan demonstrasi.";
+  });
+
+  // Initialize on load
+  init();
+
+</script>
+
+</body>
+</html>

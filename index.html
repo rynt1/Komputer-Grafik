@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Pertemuan 1-14 & Tugas Akhir</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+    :root {
+      --transition-speed: 0.3s;
+      --bg-color: #ffffff;
+      --text-color: #2c3e50;
+      --nav-bg: #ecf0f1;
+      --nav-text: #2c3e50;
+      --link-hover: #2980b9;
+      --active-bg: #3498db;
+      --active-text: #ffffff;
+      --button-bg: #3498db;
+      --button-text: #ffffff;
+      --intro-bg: #f8f9fa;
+      --intro-text: #2c3e50;
+    }
+    [data-theme='dark'] {
+      --bg-color: #1e1e1e;
+      --text-color: #ecf0f1;
+      --nav-bg: #2c3e50;
+      --nav-text: #ecf0f1;
+      --link-hover: #3498db;
+      --active-bg: #2980b9;
+      --active-text: #ecf0f1;
+      --button-bg: #2980b9;
+      --button-text: #ecf0f1;
+      --intro-bg: #2c3e50;
+      --intro-text: #ecf0f1;
+    }
+    [data-theme='brown'] {
+      --bg-color: #f9f5f0;
+      --text-color: #5a381e;
+      --nav-bg: #e2d5ca;
+      --nav-text: #5a381e;
+      --link-hover: #b08968;
+      --active-bg: #a67c52;
+      --active-text: #f9f5f0;
+      --button-bg: #a67c52;
+      --button-text: #f9f5f0;
+      --intro-bg: #e2d5ca;
+      --intro-text: #5a381e;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    nav {
+      width: 280px;
+      background-color: var(--nav-bg);
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    nav h2 {
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+      text-align: center;
+      font-weight: 700;
+      color: var(--nav-text);
+    }
+    nav h3 {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--nav-text);
+      border-bottom: 1px solid var(--link-hover);
+      padding-bottom: 0.3rem;
+    }
+    nav ul {
+      list-style: none;
+    }
+    nav ul li {
+      margin-bottom: 0.5rem;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: var(--nav-text);
+      display: block;
+      padding: 0.7rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+    }
+    nav ul li a:hover {
+      background-color: var(--link-hover);
+      color: var(--active-text);
+    }
+    nav ul li a.active {
+      background-color: var(--active-bg);
+      color: var(--active-text);
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .intro {
+      background-color: var(--intro-bg);
+      color: var(--intro-text);
+      padding: 2.5rem;
+      border-radius: 8px;
+      margin: auto;
+      text-align: center;
+      max-width: 550px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .intro h2 {
+      margin-bottom: 1.2rem;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .intro p {
+      margin: 0.6rem 0;
+      font-size: 1.1rem;
+    }
+    .toggle-container {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 11;
+    }
+    .toggle-button {
+      background-color: var(--button-bg);
+      border: none;
+      padding: 0.6rem 0.8rem;
+      cursor: pointer;
+      border-radius: 50%;
+      color: var(--button-text);
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      transition: background-color var(--transition-speed), transform 0.2s;
+    }
+    .toggle-button:hover {
+      transform: scale(1.1);
+    }
+    .menu-toggle {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      font-size: 1.4rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 11;
+    }
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: opacity var(--transition-speed);
+    }
+    iframe.hidden {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    @media (max-width: 768px) {
+      nav {
+        position: absolute;
+        left: -300px;
+        top: 0;
+        height: 100%;
+        z-index: 10;
+        transition: left 0.3s ease;
+      }
+      nav.active {
+        left: 0;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      main {
+        padding-left: 0;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <nav>
+    <h2>Dashboard</h2>
+    <ul>
+      <li><a href="#" data-src="intro" class="active">🏠 Beranda</a></li>
+    </ul>
+    <h3>Pertemuan</h3>
+    <ul>
+      <li><a href="#" data-src="pertemuan1.html">📘 Pertemuan 1</a></li>
+      <li><a href="#" data-src="pertemuan2.html">📗 Pertemuan 2</a></li>
+      <li><a href="#" data-src="pertemuan3.html">📙 Pertemuan 3</a></li>
+      <li><a href="#" data-src="pertemuan4.html">📕 Pertemuan 4</a></li>
+      <li><a href="#" data-src="pertemuan5.html">📒 Pertemuan 5</a></li>
+      <li><a href="#" data-src="pertemuan6.html">📔 Pertemuan 6</a></li>
+      <li><a href="#" data-src="pertemuan7.html">📓 Pertemuan 7</a></li>
+      <li><a href="#" data-src="pertemuan8.html">📑 Pertemuan 8</a></li>
+      <li><a href="#" data-src="pertemuan9.html">📖 Pertemuan 9</a></li>
+      <li><a href="#" data-src="pertemuan10.html">📚 Pertemuan 10</a></li>
+      <li><a href="#" data-src="pertemuan11.html">📝 Pertemuan 11</a></li>
+      <li><a href="#" data-src="pertemuan12.html">📋 Pertemuan 12</a></li>
+      <li><a href="#" data-src="pertemuan13.html">📒 Pertemuan 13</a></li>
+      <li><a href="#" data-src="pertemuan14.html">📔 Pertemuan 14</a></li>
+    </ul>
+    <h3>Tugas Akhir</h3>
+    <ul>
+      <li><a href="#" data-src="tugasakhir.html">🎯 Tugas Akhir</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="toggle-container">
+      <button id="themeToggle" class="toggle-button" title="Ganti Tema">☀️</button>
+    </div>
+    <div class="menu-toggle" id="menuToggle">☰</div>
+    <div class="intro" id="introDiv">
+      <h2>Selamat Datang!</h2>
+      <p><strong>Nama:</strong> Ira Yanti</p>
+      <p><strong>NIM:</strong> 241011400717</p>
+      <p><strong>Kelas:</strong> 02TPLM005/V.108</p>
+      <p><strong>Program Studi:</strong> Teknik Informatika</p>
+      <p><strong>Fakultas:</strong> Ilmu Komputer</p>
+      <p><strong>Universitas Pamulang</strong></p>
+      <p><strong>Mata Kuliah:</strong> Komputer Grafik</p>
+    </div>
+    <iframe id="contentFrame" class="hidden" src="" title="Konten"></iframe>
+  </main>
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const themes = ['light', 'dark', 'brown'];
+    const icons = { 'light': '☀️', 'dark': '🌙', 'brown': '🎨' };
+    let currentIndex = 0;
+    const links = document.querySelectorAll('nav ul li a');
+    const introDiv = document.getElementById('introDiv');
+    const contentFrame = document.getElementById('contentFrame');
+    const menuToggle = document.getElementById('menuToggle');
+    const nav = document.querySelector('nav');
+
+    function updateButtonIcon(index) {
+      const nextIndex = (index + 1) % themes.length;
+      themeToggle.textContent = icons[themes[nextIndex]];
+    }
+
+    themeToggle.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % themes.length;
+      body.setAttribute('data-theme', themes[currentIndex]);
+      updateButtonIcon(currentIndex);
+    });
+    updateButtonIcon(currentIndex);
+
+    menuToggle.addEventListener('click', () => {
+      nav.classList.toggle('active');
+    });
+
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        links.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        const src = link.getAttribute('data-src');
+        if (src === 'intro') {
+          introDiv.style.display = 'block';
+          contentFrame.classList.add('hidden');
+        } else {
+          introDiv.style.display = 'none';
+          contentFrame.src = src;
+          contentFrame.classList.remove('hidden');
+        }
+        if (window.innerWidth <= 768) {
+          nav.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

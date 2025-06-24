@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo Anti-Aliasing dalam Grafika Komputer</title>
+  <!-- Google Fonts: Poppins for elegant, modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg-top: #38a2d6;
+      --color-bg-bottom: #551138;
+      --color-container-bg: #fff5c3;
+      --color-accent: #9452a5;
+      --color-text-heading: #2c1a3c;
+      --color-text-body: #6b7280;
+      --border-radius: 0.75rem;
+      --shadow-light: rgba(0, 0, 0, 0.05);
+      --shadow-medium: rgba(148, 82, 165, 0.15);
+      --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+
+    /* Global resets */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--color-bg-top) 0%, var(--color-bg-bottom) 100%);
+      font-family: var(--font-family);
+      color: var(--color-text-body);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 1rem 5rem;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 3.5rem;
+      color: var(--color-container-bg);
+      margin: 0 0 2rem;
+      text-align: center;
+      line-height: 1.1;
+      user-select: text;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    main.container {
+      background: var(--color-container-bg);
+      max-width: 1200px;
+      width: 100%;
+      border-radius: var(--border-radius);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      padding: 3rem 3.5rem 4rem;
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      user-select: none;
+    }
+
+    section.canvas-wrapper {
+      background: #fff;
+      flex: 1 1 440px;
+      min-width: 320px;
+      border-radius: var(--border-radius);
+      padding: 1.5rem 1.5rem 2rem;
+      box-shadow: 0 6px 20px rgba(148, 82, 165, 0.15);
+      text-align: center;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    canvas {
+      background: #222;
+      border-radius: var(--border-radius);
+      border: 3px solid var(--color-accent);
+      box-shadow:
+        inset 0 0 12px rgba(0, 0, 0, 0.75),
+        0 8px 25px rgba(148, 82, 165, 0.5);
+      width: 400px;
+      height: 400px;
+      user-select: none;
+      display: block;
+    }
+
+    .canvas-wrapper p {
+      margin-top: 1.2rem;
+      font-weight: 600;
+      font-size: 1.375rem;
+      color: var(--color-accent);
+      user-select: text;
+    }
+
+    aside.controls {
+      background: var(--color-accent);
+      flex: 1 1 350px;
+      min-width: 320px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+      padding: 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--color-container-bg);
+      margin-bottom: 0.75rem;
+      user-select: text;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    label span.value {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--color-container-bg);
+      min-width: 3rem;
+      text-align: right;
+      user-select: text;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 26px; /* thumb height */
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--color-container-bg);
+      cursor: pointer;
+      outline: none;
+      margin-bottom: 2.5rem;
+      border-radius: 0.5rem;
+      user-select: none;
+      transition: background-color 0.25s ease;
+      padding: 0;
+    }
+    input[type="range"]:hover {
+      background: #d9d1e6;
+    }
+
+    /* Webkit track */
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 0.5rem;
+      background: #d5c7e1;
+    }
+
+    /* Webkit thumb */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--color-container-bg);
+      cursor: pointer;
+      border: 2px solid var(--color-accent);
+      box-shadow: 0 3px 10px rgba(148, 82, 165, 0.6);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin-top: -9px; /* center the thumb vertically */
+      position: relative;
+    }
+    input[type="range"]:hover::-webkit-slider-thumb {
+      background: #f2eae0;
+      border-color: #d3b3da;
+      transform: scale(1.1);
+    }
+
+    /* Firefox track */
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      border-radius: 0.5rem;
+      background: #d5c7e1;
+    }
+
+    /* Firefox thumb */
+    input[type="range"]::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--color-container-bg);
+      border: 2px solid var(--color-accent);
+      box-shadow: 0 3px 10px rgba(148, 82, 165, 0.6);
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      user-select: none;
+      margin-top: 0;
+      position: relative;
+    }
+    input[type="range"]:hover::-moz-range-thumb {
+      background: #f2eae0;
+      border-color: #d3b3da;
+      transform: scale(1.1);
+    }
+
+    .calculation {
+      font-family: 'Fira Code', monospace, monospace;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--color-text-heading);
+      background: var(--color-container-bg);
+      border-radius: var(--border-radius);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+      user-select: text;
+      white-space: pre-wrap;
+      margin-top: auto;
+      min-height: 260px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      main.container {
+        flex-direction: column;
+        padding: 2rem 1rem 3rem;
+        gap: 2rem;
+      }
+      section.canvas-wrapper, aside.controls {
+        min-width: 100%;
+        flex: none;
+      }
+      canvas {
+        width: 100% !important;
+        height: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Pertemuan 11 - Anti-Aliasing dalam Grafika Komputer</h1>
+  <main class="container" role="main">
+    <section class="canvas-wrapper" aria-label="Canvas tanpa anti-aliasing">
+      <canvas id="canvasNoAA" width="400" height="400" aria-label="Tanpa Anti-Aliasing"></canvas>
+      <p><strong>Tanpa Anti-Aliasing</strong></p>
+    </section>
+    <section class="canvas-wrapper" aria-label="Canvas dengan anti-aliasing">
+      <canvas id="canvasAA" width="400" height="400" aria-label="Dengan Anti-Aliasing"></canvas>
+      <p><strong>Dengan Anti-Aliasing</strong></p>
+    </section>
+    <aside class="controls" aria-label="Kontrol pengaturan garis">
+      <label for="lineWidthInput">Lebar Garis: <span id="lineWidthLabel" class="value">1</span> px</label>
+      <input type="range" id="lineWidthInput" min="1" max="10" step="1" value="1" />
+
+      <label for="angleInput">Sudut Garis (°): <span id="angleLabel" class="value">45</span>°</label>
+      <input type="range" id="angleInput" min="0" max="90" step="1" value="45" />
+
+      <div class="calculation" id="calculationOutput" aria-live="polite" aria-atomic="true" tabindex="0">
+        Memuat perhitungan...
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const canvasNoAA = document.getElementById('canvasNoAA');
+    const ctxNoAA = canvasNoAA.getContext('2d');
+    const canvasAA = document.getElementById('canvasAA');
+    const ctxAA = canvasAA.getContext('2d');
+
+    const lineWidthInput = document.getElementById('lineWidthInput');
+    const angleInput = document.getElementById('angleInput');
+    const lineWidthLabel = document.getElementById('lineWidthLabel');
+    const angleLabel = document.getElementById('angleLabel');
+    const calculationOutput = document.getElementById('calculationOutput');
+
+    // Fix canvas DPI for sharp rendering on high dpi devices
+    function fixDpi(canvas) {
+      const dpi = window.devicePixelRatio || 1;
+      const style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+      const style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+      canvas.width = style_width * dpi;
+      canvas.height = style_height * dpi;
+      return dpi;
+    }
+    const dpiNoAA = fixDpi(canvasNoAA);
+    const dpiAA = fixDpi(canvasAA);
+
+    function drawLineNoAA(ctx, angleDeg, lineWidth, dpi) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#9452a5';
+
+      const angleRad = angleDeg * Math.PI / 180;
+      const lengthPx = 300 * dpi;
+      const startX = 50 * dpi;
+      const startY = 350 * dpi;
+
+      const dx = Math.cos(angleRad);
+      const dy = -Math.sin(angleRad);
+
+      const blockSize = Math.max(1, Math.round(lineWidth * dpi));
+      const steps = Math.floor(lengthPx);
+
+      for(let i = 0; i <= steps; i++) {
+        const cx = Math.round(startX + i * dx);
+        const cy = Math.round(startY + i * dy);
+        ctx.fillRect(cx - Math.floor(blockSize/2), cy - Math.floor(blockSize/2), blockSize, blockSize);
+      }
+
+      drawPixelGrid(ctx, dpi);
+    }
+
+    function drawLineAA(ctx, angleDeg, lineWidth, dpi) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.imageSmoothingEnabled = true;
+
+      ctx.strokeStyle = '#9452a5';
+      ctx.lineWidth = lineWidth * dpi;
+      ctx.lineJoin = 'round';
+
+      const angleRad = angleDeg * Math.PI / 180;
+      const lengthPx = 300 * dpi;
+      const startX = 50 * dpi;
+      const startY = 350 * dpi;
+
+      const endX = startX + lengthPx * Math.cos(angleRad);
+      const endY = startY - lengthPx * Math.sin(angleRad);
+
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      drawPixelGrid(ctx, dpi);
+    }
+
+    function drawPixelGrid(ctx, dpi) {
+      const width = ctx.canvas.width;
+      const height = ctx.canvas.height;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(148, 82, 165, 0.15)';
+      ctx.lineWidth = 1;
+      for(let x = 0; x < width; x += dpi) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, height);
+        ctx.stroke();
+      }
+      for(let y = 0; y < height; y += dpi) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(width, y + 0.5);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function updateCalculation(angle, lineWidth) {
+      const angleRad = angle * Math.PI / 180;
+      const coverageRaw = lineWidth / (Math.abs(Math.sin(angleRad)) + Math.abs(Math.cos(angleRad)));
+      const coverage = Math.min(coverageRaw / 10, 1).toFixed(2);
+
+      const narrative =
+`Penjelasan Anti-Aliasing:
+
+- Garis digambar pada sudut ${angle}°.
+- Lebar garis (ketebalan) adalah ${lineWidth}px.
+- Perhitungan estimasi cakupan pixel:
+  cakupan = ketebalan / (|sin(sudut)| + |cos(sudut)|)
+   
+  = ${lineWidth} / (|sin(${angle}°)| + |cos(${angle}°)|)
+  = ${lineWidth} / (${Math.abs(Math.sin(angleRad)).toFixed(3)} + ${Math.abs(Math.cos(angleRad)).toFixed(3)})
+  = ${coverageRaw.toFixed(3)}
+
+- Cakupan ter-normalisasi (skala 0-1): ${coverage}
+
+Interpretasi Perbedaan:
+
+- Tanpa Anti-Aliasing, pixel hanya "hidup" sepenuhnya (full on) atau mati (off),
+  membuat garis terlihat "bergelombang" atau kasar (aliasing).
+- Dengan Anti-Aliasing, pixel yang tercakup sebagian (seperti ${coverage}) 
+  dibuat lebih halus dengan blending warna di tepian, sehingga garis lebih rapi dan smooth.
+- Semakin tinggi cakupan pixel, semakin pixel tersebut terlihat gelap/terisi.
+
+Cobalah ubah lebar garis dan sudut untuk melihat perubahan visual dan nilai cakupan pixel dalam perhitungan.
+
+Perbedaan utama:
+- Tanpa Anti-Aliasing: garis tampak bergerigi dan kasar karena batas pixel jelas.
+- Dengan Anti-Aliasing: garis tampak halus karena warna pixel di tepian dikombinasi berdasarkan tingkat cakupan.
+`;
+
+      calculationOutput.textContent = narrative;
+    }
+
+    function draw() {
+      const lineWidth = parseInt(lineWidthInput.value, 10);
+      const angle = parseInt(angleInput.value, 10);
+      lineWidthLabel.textContent = lineWidth;
+      angleLabel.textContent = angle;
+      drawLineNoAA(ctxNoAA, angle, lineWidth, dpiNoAA);
+      drawLineAA(ctxAA, angle, lineWidth, dpiAA);
+      updateCalculation(angle, lineWidth);
+    }
+
+    lineWidthInput.addEventListener('input', draw);
+    angleInput.addEventListener('input', draw);
+
+    draw();
+  </script>
+</body>
+</html>

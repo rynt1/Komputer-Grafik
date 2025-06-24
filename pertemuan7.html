@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Proyeksi pada Komputer Grafik</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .container {
+    background: rgba(0,0,0,0.7);
+    border-radius: 12px;
+    max-width: 1200px;
+    width: 100%;
+    padding: 2rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  }
+
+  h1 {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #f6d365;
+    text-shadow: 0 0 8px #f6d365aa;
+  }
+  
+  p.description {
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: #eaeaea;
+    text-align: center;
+  }
+
+  form {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    font-size: 0.9rem;
+    width: 150px;
+  }
+
+  input[type="number"] {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  input[type="number"]:focus {
+    box-shadow: 0 0 5px 2px #f6d365bb;
+  }
+
+  .output-section {
+    background: #222;
+    padding: 1.3rem 1.5rem;
+    border-radius: 8px;
+    font-family: monospace;
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+    box-shadow: inset 0 0 8px #f6d365aa;
+  }
+
+  .output-section h2 {
+    margin-top: 0;
+    color: #f6d365;
+    text-align: center;
+  }
+
+  #canvas-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  canvas {
+    background: #111;
+    border-radius: 8px;
+    box-shadow: 0 0 15px #f6d365aa;
+    max-width: 100%;
+    height: 600px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #f6d365bb;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    label {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pertemuan 7 - Proyeksi pada Komputer Grafik</h1>
+    <p class="description">
+      Proyeksi adalah proses mengubah titik-titik 3D menjadi titik 2D agar dapat ditampilkan pada layar.  
+      Salah satu jenis proyeksi yang umum digunakan adalah <strong>Proyeksi Perspektif</strong>,  
+      yang mensimulasikan bagaimana objek terlihat lebih kecil saat jaraknya semakin jauh.<br><br>
+      Rumus untuk memproyeksikan titik 3D <code>(X, Y, Z)</code> ke bidang pandang 2D dengan panjang fokus <code>f</code> adalah:<br><br>
+      <code>x' = f * (X / Z), &nbsp;&nbsp; y' = f * (Y / Z)</code>  <br><br>
+      Input di bawah untuk mengubah parameter:
+    </p>
+
+    <form id="projection-form">
+      <label>
+        Koordinat X:
+        <input type="number" id="inputX" step="0.1" value="3" />
+      </label>
+      <label>
+        Koordinat Y:
+        <input type="number" id="inputY" step="0.1" value="2" />
+      </label>
+      <label>
+        Koordinat Z:&nbsp;&nbsp;&nbsp;
+        <input type="number" id="inputZ" step="0.1" min="0.1" value="5" />
+      </label>
+      <label>
+        Panjang Fokus (f):
+        <input type="number" id="inputF" step="0.1" min="0.1" value="2" />
+      </label>
+    </form>
+
+    <section class="output-section" aria-live="polite">
+      <h2>Perhitungan Proyeksi</h2>
+      <pre id="calculation-output">Menunggu input...</pre>
+    </section>
+
+    <div id="canvas-container">
+      <canvas id="projection-canvas" width="1000" height="600" aria-label="Visualisasi Proyeksi"></canvas>
+    </div>
+    
+    <footer>Hasil Proyeksi - Komputer Grafik</footer>
+  </div>
+
+<script>
+  (() => {
+    const inputX = document.getElementById('inputX');
+    const inputY = document.getElementById('inputY');
+    const inputZ = document.getElementById('inputZ');
+    const inputF = document.getElementById('inputF');
+    const calcOutput = document.getElementById('calculation-output');
+    const canvas = document.getElementById('projection-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const canvasHeight = 600;
+    const baseScale = 50;
+    const verticalOffset = 60;
+
+    function drawLabel(x, y, text) {
+      const padding = 4;
+      const textWidth = ctx.measureText(text).width;
+      let labelX = x + 10;
+      if (labelX + textWidth + padding > canvas.width) labelX = x - 10 - textWidth;
+      if (labelX < 0) labelX = x + 10;
+      ctx.fillText(text, labelX, y);
+    }
+
+    function drawAxes(cx, cy, scale) {
+      ctx.strokeStyle = '#f6d365';
+      ctx.fillStyle = '#f6d365';
+      ctx.lineWidth = 1;
+      ctx.font = '12px Inter';
+      ctx.textBaseline = 'middle';
+
+      ctx.beginPath();
+      ctx.moveTo(30, cy);
+      ctx.lineTo(canvas.width - 30, cy);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, 30);
+      ctx.lineTo(cx, canvas.height - 30);
+      ctx.stroke();
+
+      const tickSize = 6;
+      const tickStep = scale;
+      const leftLimit = 30;
+      const rightLimit = canvas.width - 30;
+
+      let numTicksLeft = Math.floor((cx - leftLimit) / tickStep);
+      let numTicksRight = Math.floor((rightLimit - cx) / tickStep);
+
+      ctx.fillText('0', cx - 6, cy + 15);
+
+      for (let i = 1; i <= numTicksRight; i++) {
+        const xPos = cx + i * tickStep;
+        ctx.beginPath();
+        ctx.moveTo(xPos, cy - tickSize / 2);
+        ctx.lineTo(xPos, cy + tickSize / 2);
+        ctx.stroke();
+        ctx.fillText(i.toString(), xPos - 4, cy + 15);
+      }
+
+      for (let i = 1; i <= numTicksLeft; i++) {
+        const xPos = cx - i * tickStep;
+        ctx.beginPath();
+        ctx.moveTo(xPos, cy - tickSize / 2);
+        ctx.lineTo(xPos, cy + tickSize / 2);
+        ctx.stroke();
+        ctx.fillText((-i).toString(), xPos - 8, cy + 15);
+      }
+
+      ctx.strokeStyle = '#f6d36588';
+      ctx.lineWidth = 0.7;
+      for (let i = -numTicksLeft; i <= numTicksRight; i++) {
+        if (i === 0) continue;
+        const halfPos1 = cx + i * tickStep - tickStep / 2;
+        if (halfPos1 > leftLimit && halfPos1 < rightLimit) {
+          ctx.beginPath();
+          ctx.moveTo(halfPos1, cy - tickSize / 4);
+          ctx.lineTo(halfPos1, cy + tickSize / 4);
+          ctx.stroke();
+        }
+      }
+
+      ctx.strokeStyle = '#f6d365';
+      ctx.fillStyle = '#f6d365';
+      ctx.lineWidth = 1;
+
+      const topLimit = 30;
+      const bottomLimit = canvas.height - 30;
+      let numTicksUp = Math.floor((cy - topLimit) / tickStep);
+      let numTicksDown = Math.floor((bottomLimit - cy) / tickStep);
+
+      for (let i = 1; i <= numTicksUp; i++) {
+        const yPos = cy - i * tickStep;
+        ctx.beginPath();
+        ctx.moveTo(cx - tickSize / 2, yPos);
+        ctx.lineTo(cx + tickSize / 2, yPos);
+        ctx.stroke();
+        ctx.fillText(i.toString(), cx + 10, yPos + 3);
+      }
+
+      for (let i = 1; i <= numTicksDown; i++) {
+        const yPos = cy + i * tickStep;
+        ctx.beginPath();
+        ctx.moveTo(cx - tickSize / 2, yPos);
+        ctx.lineTo(cx + tickSize / 2, yPos);
+        ctx.stroke();
+        ctx.fillText((-i).toString(), cx + 10, yPos + 3);
+      }
+
+      ctx.strokeStyle = '#f6d36588';
+      ctx.lineWidth = 0.7;
+      for (let i = -numTicksUp; i <= numTicksDown; i++) {
+        if (i === 0) continue;
+        const halfPos1 = cy - i * tickStep + tickStep / 2;
+        if (halfPos1 > topLimit && halfPos1 < bottomLimit) {
+          ctx.beginPath();
+          ctx.moveTo(cx - tickSize / 4, halfPos1);
+          ctx.lineTo(cx + tickSize / 4, halfPos1);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function drawScene(X, Y, Z, f, xP, yP, scale) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2 + verticalOffset;
+
+      drawAxes(cx, cy, scale);
+
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1;
+      ctx.font = '14px Inter';
+      ctx.fillStyle = '#aaa';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#aaa';
+      ctx.fillText('Origin (0,0,0)', cx + 8, cy + 16);
+
+      ctx.strokeStyle = '#888';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx, cy - scale * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#aaa';
+      ctx.fillText('Sumbu Z', cx + 8, cy - scale * 2 + 12);
+
+      ctx.fillStyle = '#4ecdc4';
+      const px3D = cx + X * scale * 0.4;
+      const py3D = cy - Z * scale;
+      ctx.beginPath();
+      ctx.arc(px3D, py3D, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      drawLabel(px3D, py3D, 'Titik 3D (' + X.toFixed(1) + ',' + Y.toFixed(1) + ',' + Z.toFixed(1) + ')');
+
+      ctx.strokeStyle = '#f6d365';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(30, cy);
+      ctx.lineTo(canvas.width - 30, cy);
+      ctx.stroke();
+      ctx.fillStyle = '#f6d365';
+      ctx.fillText('Bidang Proyeksi (2D)', 40, cy - 10);
+
+      const projX = cx + xP * scale;
+      const projY = cy - yP * scale;
+      ctx.fillStyle = '#ff6f91';
+      ctx.beginPath();
+      ctx.arc(projX, projY, 10, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      drawLabel(projX, projY, 'Titik Proyeksi (' + xP.toFixed(2) + ',' + yP.toFixed(2) + ')');
+
+      ctx.strokeStyle = '#bbb';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px3D, py3D);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(px3D, py3D);
+      ctx.lineTo(projX, projY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(projX, projY);
+      ctx.stroke();
+    }
+
+    function updateProjection() {
+      const X = parseFloat(inputX.value) || 0;
+      const Y = parseFloat(inputY.value) || 0;
+      let Z = parseFloat(inputZ.value);
+      if (!Z || Z <= 0) Z = 0.1;
+      const f = parseFloat(inputF.value);
+      if (!f || f <= 0) {
+        calcOutput.textContent = 'Panjang fokus harus lebih dari 0!';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      const xP = f * (X / Z);
+      const yP = f * (Y / Z);
+
+      const maxCoordX = Math.max(Math.abs(X), Math.abs(xP));
+      let desiredWidth = Math.ceil((maxCoordX * baseScale * 2) + 80);
+      desiredWidth = Math.min(Math.max(desiredWidth, 800), 1600);
+
+      let scale = 0;
+      if (maxCoordX > 0) {
+        scale = (desiredWidth - 80) / (maxCoordX * 2);
+        scale = Math.min(Math.max(scale, 20), 50);
+      } else {
+        scale = baseScale;
+      }
+
+      canvas.width = Math.max(desiredWidth, 1000);
+      canvas.height = canvasHeight;
+
+      const narrative =
+        'Diketahui:\n' +
+        '  X = ' + X + '\n' +
+        '  Y = ' + Y + '\n' +
+        '  Z = ' + Z + '\n' +
+        '  Panjang fokus f = ' + f + '\n\n' +
+        'Menggunakan rumus Proyeksi Perspektif:\n\n' +
+        '  x\' = f * (X / Z) = ' + f + ' * (' + X + ' / ' + Z + ') = ' + xP.toFixed(4) + '\n' +
+        '  y\' = f * (Y / Z) = ' + f + ' * (' + Y + ' / ' + Z + ') = ' + yP.toFixed(4) + '\n\n' +
+        'Koordinat titik 2D hasil proyeksi:\n\n' +
+        '  (x\', y\') = (' + xP.toFixed(4) + ', ' + yP.toFixed(4) + ')';
+
+      calcOutput.textContent = narrative;
+
+      drawScene(X, Y, Z, f, xP, yP, scale);
+    }
+
+    [inputX, inputY, inputZ, inputF].forEach(input => {
+      input.addEventListener('input', updateProjection);
+    });
+
+    updateProjection();
+  })();
+</script>
+</body>
+</html>

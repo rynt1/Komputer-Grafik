@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pertemuan 14 - Animasi Orang & Komputer Grafik</title>
+  <style>
+    body, html {
+      margin: 0; padding: 20px;
+      background: black;
+      color: rgb(209, 65, 65);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      user-select: none;
+      gap: 24px;
+    }
+    canvas {
+      background: black;
+      border: 1px solid #444;
+      display: block;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+      border-radius: 6px;
+      width: 480px;
+      height: 250px;
+    }
+    #canvasTop, #canvasBottom {
+      width: 480px;
+      height: 250px;
+    }
+    #infoBox {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid white;
+      border-radius: 10px;
+      width: 480px;
+      padding: 15px 25px;
+      font-size: 14px;
+      line-height: 1.3;
+      color: #ddd;
+      user-select: text;
+      font-family: monospace, monospace;
+    }
+    #infoBox h2 {
+      margin-top: 0;
+      font-weight: bold;
+      font-size: 18px;
+      color: #f0a500;
+      margin-bottom: 8px;
+    }
+    .calc-section {
+      margin-bottom: 16px;
+    }
+    .calc-label {
+      color: #85d7ff;
+      font-weight: 600;
+    }
+    /* Manual input styling */
+    #manualControls {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid white;
+      border-radius: 10px;
+      width: 480px;
+      padding: 20px 25px;
+      font-size: 14px;
+      color: #ddd;
+      font-family: monospace, monospace;
+    }
+    #manualControls h2 {
+      margin-top: 0;
+      font-weight: bold;
+      font-size: 18px;
+      color: #f0a500;
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #85d7ff;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 6px 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 16px;
+      font-family: monospace, monospace;
+    }
+    button {
+      background: #f0a500;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: black;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      margin-bottom: 20px;
+    }
+    button:hover {
+      background: #d18e00;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Pertemuan 14 - Animasi Orang & Komputer Grafik</h1>
+
+  <!-- Kanvas 1: Animasi Orang + Teks -->
+  <canvas id="canvasTop" width="480" height="250"></canvas>
+
+  <!-- Kanvas 2: Kotak Polygon kuning dan teks di tengah -->
+  <canvas id="canvasBottom" width="480" height="250"></canvas>
+
+  <!-- Tombol untuk Pause / Play Animasi Otomatis -->
+  <button id="toggleAnimButton" aria-pressed="true" aria-label="Jeda atau lanjutkan animasi otomatis">Jeda Animasi Otomatis</button>
+
+  <!-- Info otomatis -->
+  <div id="infoBox" aria-live="polite" aria-atomic="true">
+    <h2>Perhitungan Otomatis Animasi</h2>
+
+    <div class="calc-section" id="personPositionSection">
+      <div><span class="calc-label">Posisi Orang (x):</span> <span id="personX">-</span> px</div>
+      <div><span class="calc-label">Pose saat ini:</span> <span id="personPose">-</span></div>
+      <div><span class="calc-label">Kecepatan orang:</span> 10 px/frame</div>
+    </div>
+
+    <div class="calc-section" id="textAlphaSection">
+      <div><span class="calc-label">Alpha teks (nilai 0-255):</span> <span id="textAlpha">-</span></div>
+      <div><span class="calc-label">Alpha normalisasi (0-1):</span> <span id="textAlphaNorm">-</span></div>
+      <div><span class="calc-label">Perubahan alpha per frame:</span> ±15</div>
+    </div>
+
+    <div class="calc-section" id="textOffsetSection">
+      <div><span class="calc-label">Offset X teks (acak):</span> <span id="offsetX">-</span> px</div>
+      <div><span class="calc-label">Offset Y teks (acak):</span> <span id="offsetY">-</span> px</div>
+    </div>
+
+    <div class="calc-section" id="polygonSection">
+      <div><span class="calc-label">Ukuran Kotak Polygon:</span> 280 px (lebar) × 110 px (tinggi)</div>
+      <div><span class="calc-label">Posisi Kotak Kiri Atas (x, y):</span> <span id="boxX">-</span> , <span id="boxY">-</span></div>
+      <div><span class="calc-label">Koordinat Polygon (relatif ke kiri atas):</span></div>
+      <ul>
+        <li>(0, 0)</li>
+        <li>(280, 0)</li>
+        <li>(280, 110)</li>
+        <li>(30, 110)</li>
+        <li>(0, 125)</li>
+        <li>(20, 110)</li>
+        <li>(0, 110)</li>
+      </ul>
+      <div><span class="calc-label">Teks "Komputer Grafik" posisi (x, y):</span> <span id="textX">-</span> , <span id="textY">-</span></div>
+      <div><span class="calc-label">Lebar teks terukur:</span> <span id="textWidth">-</span> px</div>
+    </div>
+  </div>
+
+  <script>
+    const canvasTop = document.getElementById('canvasTop');
+    const ctxTop = canvasTop.getContext('2d');
+
+    let xOrang = -100;
+    const yOrang = 80;
+    const kecepatanOrang = 10;
+
+    let pose = 1;
+
+    let alpha = 10;
+    const alphaStep = 15;
+    const alphaLimit = 240;
+    let alphaIncreasing = true;
+
+    let textOffsetX = 0;
+    let textOffsetY = 0;
+
+    // Info elemen otomatis
+    const info = {
+      personX: document.getElementById('personX'),
+      personPose: document.getElementById('personPose'),
+      textAlpha: document.getElementById('textAlpha'),
+      textAlphaNorm: document.getElementById('textAlphaNorm'),
+      offsetX: document.getElementById('offsetX'),
+      offsetY: document.getElementById('offsetY'),
+    };
+
+    // Toggle kontrol animasi
+    const toggleAnimButton = document.getElementById('toggleAnimButton');
+    let animasiBerjalan = true;
+
+    // Fungsi berhenti/jalankan animasi otomatis
+    toggleAnimButton.addEventListener('click', () => {
+      animasiBerjalan = !animasiBerjalan;
+      toggleAnimButton.textContent = animasiBerjalan ? 'Jeda Animasi Otomatis' : 'Lanjutkan Animasi Otomatis';
+      toggleAnimButton.setAttribute('aria-pressed', animasiBerjalan.toString());
+      if (animasiBerjalan) {
+        requestAnimationFrame(updateAndRenderTop);
+      }
+    });
+
+    // Fungsi warna rgba dengan alpha normalisasi
+    function randomColorWithAlpha(alphaVal) {
+      const r = Math.floor(Math.random() * 251);
+      const g = Math.floor(Math.random() * 251);
+      const b = Math.floor(Math.random() * 251);
+      const normAlpha = Math.min(Math.max(alphaVal / 255, 0), 1);
+      return `rgba(${r},${g},${b},${normAlpha.toFixed(2)})`;
+    }
+
+    function calculatePose(x) {
+      return (Math.floor(x / kecepatanOrang) % 2) === 0 ? 1 : 2;
+    }
+
+    function drawOrang(ctx, x, y, pose) {
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'white';
+      ctx.fillStyle = 'white';
+
+      if (pose === 1) {
+        ctx.beginPath();
+        ctx.ellipse(x + 48, y + 20, 10, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 32);
+        ctx.lineTo(x + 40, y + 52);
+        ctx.lineTo(x + 33, y + 73);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 32);
+        ctx.lineTo(x + 62, y + 55);
+        ctx.lineTo(x + 79, y + 72);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 69);
+        ctx.lineTo(x + 34, y + 112);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 69);
+        ctx.lineTo(x + 67, y + 93);
+        ctx.lineTo(x + 74, y + 118);
+        ctx.stroke();
+
+      } else if (pose === 2) {
+        ctx.beginPath();
+        ctx.ellipse(x + 52, y + 20, 10, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 29);
+        ctx.lineTo(x + 48, y + 48);
+        ctx.lineTo(x + 48, y + 77);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 29);
+        ctx.lineTo(x + 57, y + 58);
+        ctx.lineTo(x + 59, y + 74);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 29);
+        ctx.lineTo(x + 54, y + 68);
+        ctx.lineTo(x + 60, y + 90);
+        ctx.lineTo(x + 54, y + 120);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 54, y + 68);
+        ctx.lineTo(x + 68, y + 92);
+        ctx.lineTo(x + 46, y + 106);
+        ctx.stroke();
+      }
+    }
+
+    // Fungsi animasi otomatis berjalan
+    function updateAndRenderTop() {
+      if (!animasiBerjalan) return; // Jeda, jangan update animasi
+
+      ctxTop.clearRect(0, 0, canvasTop.width, canvasTop.height);
+
+      drawOrang(ctxTop, xOrang, yOrang, pose);
+
+      ctxTop.font = '33px Times New Roman';
+
+      const alphaNormalized = Math.min(Math.max(alpha / 255, 0), 1);
+      ctxTop.fillStyle = randomColorWithAlpha(alpha);
+
+      ctxTop.fillText(' IRA YANTI', 20 + textOffsetX, 50 + textOffsetY);
+
+      if (xOrang < canvasTop.width) {
+        pose = (pose === 1) ? 2 : 1;
+        xOrang += kecepatanOrang;
+      } else {
+        xOrang = -100;
+      }
+
+      if (alphaIncreasing) {
+        alpha += alphaStep;
+        if (alpha >= alphaLimit) {
+          alpha = alphaLimit;
+          alphaIncreasing = false;
+        }
+      } else {
+        alpha -= alphaStep;
+        if (alpha <= 15) {
+          alpha = 15;
+          alphaIncreasing = true;
+        }
+      }
+
+      textOffsetX = Math.floor(Math.random() * 21) - 10;
+      textOffsetY = Math.floor(Math.random() * 21) - 10;
+
+      info.personX.textContent = xOrang.toFixed(1);
+      info.personPose.textContent = pose;
+      info.textAlpha.textContent = alpha.toFixed(1);
+      info.textAlphaNorm.textContent = alphaNormalized.toFixed(2);
+      info.offsetX.textContent = textOffsetX;
+      info.offsetY.textContent = textOffsetY;
+
+      requestAnimationFrame(updateAndRenderTop);
+    }
+
+    updateAndRenderTop();
+
+    // Kanvas bawah - polygon kotak dan teks
+    const canvasBottom = document.getElementById('canvasBottom');
+    const ctxBottom = canvasBottom.getContext('2d');
+
+    const boxWidth = 280;
+    const boxHeight = 110;
+
+    function drawCenteredKotakDenganTeks() {
+      ctxBottom.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
+
+      const centerX = canvasBottom.width / 2;
+      const centerY = canvasBottom.height / 2;
+
+      const boxLeftX = centerX - boxWidth / 2;
+      const boxTopY = centerY - boxHeight / 2;
+
+      ctxBottom.beginPath();
+      ctxBottom.moveTo(boxLeftX + 0, boxTopY + 0);
+      ctxBottom.lineTo(boxLeftX + boxWidth, boxTopY + 0);
+      ctxBottom.lineTo(boxLeftX + boxWidth, boxTopY + boxHeight);
+      ctxBottom.lineTo(boxLeftX + 30, boxTopY + boxHeight);
+      ctxBottom.lineTo(boxLeftX + 0, boxTopY + boxHeight + 15);
+      ctxBottom.lineTo(boxLeftX + 20, boxTopY + boxHeight);
+      ctxBottom.lineTo(boxLeftX + 0, boxTopY + boxHeight);
+      ctxBottom.closePath();
+
+      ctxBottom.fillStyle = 'red';
+      ctxBottom.fill();
+      ctxBottom.strokeStyle = 'white';
+      ctxBottom.lineWidth = 2;
+      ctxBottom.stroke();
+
+      const text = 'Komputer Grafik';
+      ctxBottom.fillStyle = 'white';
+      ctxBottom.font = '28px Times New Roman';
+
+      const textWidth = ctxBottom.measureText(text).width;
+      const textX = centerX - textWidth / 2;
+      const textY = centerY + 10;
+
+      ctxBottom.fillText(text, textX, textY);
+
+      const boxXelem = document.getElementById('boxX');
+      const boxYelem = document.getElementById('boxY');
+      const textXelem = document.getElementById('textX');
+      const textYelem = document.getElementById('textY');
+      const textWelem = document.getElementById('textWidth');
+
+      boxXelem.textContent = boxLeftX.toFixed(1);
+      boxYelem.textContent = boxTopY.toFixed(1);
+      textXelem.textContent = textX.toFixed(1);
+      textYelem.textContent = textY.toFixed(1);
+      textWelem.textContent = textWidth.toFixed(1);
+    }
+
+    drawCenteredKotakDenganTeks();
+
+  </script>
+
+</body>
+</html>

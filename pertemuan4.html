@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pertemuan 4 - Algoritma Pembuatan Lingkaran</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121224;
+      color: #e0e0e0;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      color: #7fffd4;
+      margin-top: 0;
+    }
+    section {
+      background-color: #2a2a3c;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 15px rgba(0,255,255,0.1);
+      margin-bottom: 30px;
+    }
+    .formula {
+      background-color: #20203a;
+      padding: 12px 18px;
+      border-left: 5px solid #7fffd4;
+      margin: 15px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    label {
+      font-weight: bold;
+      margin-right: 10px;
+      display: inline-block;
+      user-select: none;
+    }
+    input[type=number] {
+      width: 70px;
+      font-family: monospace;
+      font-size: 1rem;
+      padding: 4px 6px;
+      border: none;
+      border-radius: 5px;
+      background-color: #44475a;
+      color: #f8f8f2;
+      outline: none;
+      transition: background-color 0.3s ease;
+    }
+    input[type=number]:focus {
+      background-color: #6272a4;
+    }
+    button {
+      background-color: #7fffd4;
+      border: none;
+      border-radius: 6px;
+      color: #002222;
+      font-weight: bold;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-left: 15px;
+      user-select: none;
+      font-size: 1rem;
+    }
+    button:hover {
+      background-color: #44e6c1;
+    }
+    canvas {
+      background-color: #121224;
+      border: 1px solid #444;
+      display: block;
+      margin-top: 15px;
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-family: monospace;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px 12px;
+      text-align: center;
+      background-color: #1f1f34;
+    }
+    th {
+      background-color: #4f708e;
+      color: #c0f0f0;
+    }
+    .example-solution {
+      background-color: #20203a;
+      border-left: 5px solid #44e6c1;
+      padding: 15px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      overflow-x: auto;
+      max-height: 300px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Pertemuan 4 - Algoritma Pembuatan Lingkaran</h1>
+
+<section>
+  <h2>Penjelasan & Rumus Lingkaran</h2>
+  <div class="formula">
+    Persamaan lingkaran dengan pusat (h,k) dan jari-jari r:  
+    (x - h)² + (y - k)² = r²  
+
+    Dengan parameter sudut θ (dalam radian), koordinat titik pada lingkaran adalah:  
+    x = h + r * cos(θ)  
+    y = k + r * sin(θ)
+  </div>
+</section>
+
+<section>
+  <h2>Implementasi Algoritma</h2>
+  <label for="input-h">Pusat h:</label>
+  <input type="number" id="input-h" value="200" />
+  <label for="input-k">Pusat k:</label>
+  <input type="number" id="input-k" value="200" />
+  <label for="input-r">Jari-jari r:</label>
+  <input type="number" id="input-r" value="100" />
+  <button id="btn-draw">Gambar Lingkaran</button>
+
+  <canvas id="circleCanvas" width="400" height="400"></canvas>
+
+  <h3>Tabel Perhitungan Titik Lingkaran</h3>
+  <table aria-label="Tabel koordinat lingkaran">
+    <thead>
+      <tr><th>Iterasi</th><th>θ (derajat)</th><th>x</th><th>y</th></tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <h3>Contoh Penyelesaian</h3>
+  <div class="example-solution" id="example-solution" aria-label="Contoh penyelesaian">
+    <!-- Isi contoh penyelesaian otomatis muncul di sini -->
+  </div>
+</section>
+
+<script>
+  function degToRad(deg) {
+    return deg * Math.PI / 180;
+  }
+
+  function drawCircle() {
+    const h = parseInt(document.getElementById('input-h').value);
+    const k = parseInt(document.getElementById('input-k').value);
+    const r = parseInt(document.getElementById('input-r').value);
+    const canvas = document.getElementById('circleCanvas');
+    const ctx = canvas.getContext('2d');
+    const tableBody = document.getElementById('table-body');
+    const exampleDiv = document.getElementById('example-solution');
+
+    // Validasi sederhana
+    if (isNaN(h) || isNaN(k) || isNaN(r) || r <= 0) {
+      alert('Masukkan nilai pusat (h,k) dan jari-jari r yang valid, dimana r > 0');
+      return;
+    }
+
+    // Clear canvas and table and example
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    tableBody.innerHTML = '';
+    exampleDiv.innerHTML = '';
+
+    ctx.beginPath();
+    let i = 1;
+    let exampleText = '';
+    for (let thetaDeg = 0; thetaDeg <= 360; thetaDeg += 10) {
+      const thetaRad = degToRad(thetaDeg);
+      const x = h + r * Math.cos(thetaRad);
+      const y = k + r * Math.sin(thetaRad);
+
+      if (i === 1) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+
+      // Add to table
+      const row = '<tr>' +
+        '<td>' + i + '</td>' +
+        '<td>' + thetaDeg + '</td>' +
+        '<td>' + x.toFixed(2) + '</td>' +
+        '<td>' + y.toFixed(2) + '</td>' +
+      '</tr>';
+      tableBody.insertAdjacentHTML('beforeend', row);
+
+      // Add to example text with concatenation (avoiding backtick problems)
+      exampleText += 'Iterasi sudut θ = ' + thetaDeg + '°:\n' + 
+        '  θ(rad) = ' + thetaDeg + ' × π / 180 = ' + thetaRad.toFixed(4) + '\n' +
+        '  x = ' + h + ' + ' + r + ' * cos(' + thetaRad.toFixed(4) + ') = ' + x.toFixed(2) + '\n' +
+        '  y = ' + k + ' + ' + r + ' * sin(' + thetaRad.toFixed(4) + ') = ' + y.toFixed(2) + '\n\n';
+
+      i++;
+    }
+    ctx.closePath();
+    ctx.strokeStyle = '#7fffd4';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    exampleDiv.textContent = exampleText.trim();
+  }
+
+  document.getElementById('btn-draw').addEventListener('click', drawCircle);
+</script>
+
+</body>
+</html>
+

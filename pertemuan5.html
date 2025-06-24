@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kurva Bezier Interaktif</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input { width: 60px; margin: 2px; }
+        canvas { border: 1px solid #000; margin-top: 10px; }
+        .input-group { margin-bottom: 10px; }
+        .output, .penjelasan-bawah {
+            margin-top: 20px;
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ccc;
+        }
+        .penjelasan-bawah {
+            background: #f0f8ff;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 15px;
+        }
+        table, th, td {
+            border: 1px solid #888;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 800px; margin: 0 auto;">
+    <h2>Kurva Bezier - Interaktif</h2>
+
+    <div class="input-group">
+        <label>Titik Kontrol (x0, y0): <input type="number" id="x0" value="50"><input type="number" id="y0" value="300"></label><br>
+        <label>Titik Kontrol (x1, y1): <input type="number" id="x1" value="150"><input type="number" id="y1" value="100"></label><br>
+        <label>Titik Kontrol (x2, y2): <input type="number" id="x2" value="300"><input type="number" id="y2" value="100"></label><br>
+        <label>Titik Kontrol (x3, y3): <input type="number" id="x3" value="400"><input type="number" id="y3" value="300"></label><br>
+        <label>Δt: <input type="number" step="0.01" id="dt" value="0.05"></label>
+        <button onclick="hitungKurva()">Hitung & Gambar</button>
+    </div>
+
+    <canvas id="bezierCanvas" width="600" height="400"></canvas>
+
+    <div class="output" id="outputMath">
+        <strong>Jumlah titik: </strong><span id="jumlahTitik"></span>
+        <table id="tabelHasil">
+            <thead>
+                <tr><th>t</th><th>X(t)</th><th>Y(t)</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="penjelasan-bawah" id="penjelasan">
+        <strong>Contoh Perhitungan Detail (misalnya t = 0.5):</strong><br><br>
+        Menggunakan rumus Bezier:
+        <pre>
+B(t) = (1−t)^3 * P0 
+     + 3(1−t)^2 * t * P1 
+     + 3(1−t) * t^2 * P2 
+     + t^3 * P3
+        </pre>
+        Misal t = 0.5 dan titik kontrol:
+        <ul>
+            <li>P0 = (50, 300)</li>
+            <li>P1 = (150, 100)</li>
+            <li>P2 = (300, 100)</li>
+            <li>P3 = (400, 300)</li>
+        </ul>
+
+        Maka langkah perhitungan untuk X:
+        <pre>
+X = (1-0.5)^3 * 50 
+  + 3*(1-0.5)^2 * 0.5 * 150 
+  + 3*(1-0.5) * 0.5^2 * 300 
+  + 0.5^3 * 400
+
+X = 0.125*50 + 0.375*150 + 0.375*300 + 0.125*400
+X = 6.25 + 56.25 + 112.5 + 50
+X = 225
+        </pre>
+
+        Dan untuk Y:
+        <pre>
+Y = (1-0.5)^3 * 300 
+  + 3*(1-0.5)^2 * 0.5 * 100 
+  + 3*(1-0.5) * 0.5^2 * 100 
+  + 0.5^3 * 300
+
+Y = 0.125*300 + 0.375*100 + 0.375*100 + 0.125*300
+Y = 37.5 + 37.5 + 37.5 + 37.5
+Y = 150
+        </pre>
+
+        Sehingga titik pada kurva Bezier di t = 0.5 adalah <strong>(225, 150)</strong>
+    </div>
+
+    <script>
+        function hitungKurva() {
+            const canvas = document.getElementById("bezierCanvas");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const x0 = parseFloat(document.getElementById("x0").value);
+            const y0 = parseFloat(document.getElementById("y0").value);
+            const x1 = parseFloat(document.getElementById("x1").value);
+            const y1 = parseFloat(document.getElementById("y1").value);
+            const x2 = parseFloat(document.getElementById("x2").value);
+            const y2 = parseFloat(document.getElementById("y2").value);
+            const x3 = parseFloat(document.getElementById("x3").value);
+            const y3 = parseFloat(document.getElementById("y3").value);
+            const dt = parseFloat(document.getElementById("dt").value);
+
+            const steps = Math.floor(1 / dt);
+            document.getElementById("jumlahTitik").textContent = steps + 1;
+
+            const tbody = document.querySelector("#tabelHasil tbody");
+            tbody.innerHTML = "";
+
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+
+            for (let i = 0; i <= steps; i++) {
+                const t = i * dt;
+                const xt = Math.pow(1 - t, 3) * x0 +
+                           3 * Math.pow(1 - t, 2) * t * x1 +
+                           3 * (1 - t) * Math.pow(t, 2) * x2 +
+                           Math.pow(t, 3) * x3;
+
+                const yt = Math.pow(1 - t, 3) * y0 +
+                           3 * Math.pow(1 - t, 2) * t * y1 +
+                           3 * (1 - t) * Math.pow(t, 2) * y2 +
+                           Math.pow(t, 3) * y3;
+
+                ctx.lineTo(xt, yt);
+
+                const row = document.createElement("tr");
+                row.innerHTML = `<td>${t.toFixed(2)}</td><td>${xt.toFixed(2)}</td><td>${yt.toFixed(2)}</td>`;
+                tbody.appendChild(row);
+            }
+
+            ctx.strokeStyle = "blue";
+            ctx.stroke();
+    // Untuk menambahkan titik hasil kurva berwarna merah
+    ctx.fillStyle = "red";
+    for (let i = 0; i <= steps; i++) {
+        const t = i * dt;
+        const xt = Math.pow(1 - t, 3) * x0 +
+                   3 * Math.pow(1 - t, 2) * t * x1 +
+                   3 * (1 - t) * Math.pow(t, 2) * x2 +
+                   Math.pow(t, 3) * x3;
+
+        const yt = Math.pow(1 - t, 3) * y0 +
+                   3 * Math.pow(1 - t, 2) * t * y1 +
+                   3 * (1 - t) * Math.pow(t, 2) * y2 +
+                   Math.pow(t, 3) * y3;
+
+        ctx.beginPath();
+        ctx.arc(xt, yt, 2.5, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+        }
+
+        hitungKurva();
+    </script>
+</div>
+</body>
+</html>

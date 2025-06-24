@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simulasi Kubus 3D</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chaparral+Pro:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Chaparral Pro', serif;
+      background: linear-gradient(to bottom, #0d0d0d, #000);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #00ffff;
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 26px;
+      text-align: center;
+      text-shadow: 0 0 8px #0ff;
+      color: #00ffff;
+      font-family: 'Chaparral Pro', serif;
+    }
+
+    .scene-wrapper {
+      margin-top: 30px;
+      height: 400px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scene {
+      width: 300px;
+      height: 300px;
+      perspective: 800px;
+      cursor: grab;
+    }
+
+    .cube {
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .face {
+      position: absolute;
+      opacity: 0.9;
+      border-radius: 6px;
+    }
+
+    .controls {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    input {
+      padding: 6px 10px;
+      font-size: 15px;
+      margin: 10px 5px;
+      width: 80px;
+      background: #000;
+      border: 1px solid #0ff;
+      border-radius: 6px;
+      color: #0ff;
+      text-align: center;
+      font-family: 'Chaparral Pro', serif;
+    }
+
+    label {
+      margin: 0 12px;
+      font-size: 15px;
+      font-family: 'Chaparral Pro', serif;
+    }
+
+    .toggle-btn {
+      margin-top: 10px;
+      padding: 8px 20px;
+      background: transparent;
+      border: 1px solid #0ff;
+      color: #0ff;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-family: 'Chaparral Pro', serif;
+    }
+
+    .toggle-btn:hover {
+      background: #0ff1;
+    }
+
+    .narration {
+      background: rgba(0, 255, 255, 0.06);
+      padding: 16px;
+      border-radius: 10px;
+      max-width: 500px;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.5;
+      box-shadow: 0 0 8px #0ff4;
+      margin: 35px 20px;
+      font-family: 'Chaparral Pro', serif;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Pertemuan 12 - Simulasi Kubus 3D</h1>
+
+  <div class="scene-wrapper">
+    <div class="scene" id="scene">
+      <div class="cube" id="cube3D">
+        <div class="face front"></div>
+        <div class="face back"></div>
+        <div class="face right"></div>
+        <div class="face left"></div>
+        <div class="face top"></div>
+        <div class="face bottom"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label>Sisi (s): <input type="number" id="sisi" value="6" oninput="updateCube()" /></label>
+    <label>Warna: <input type="color" id="warna" value="#00ffff" oninput="updateCube()" /></label>
+    <br />
+    <button class="toggle-btn" onclick="toggleAutoRotate()">Aktifkan / Nonaktifkan Rotasi Otomatis</button>
+  </div>
+
+  <div class="narration" id="narrationBox">
+    Volume = s³ = 6³ = 216 unit³<br />
+    Luas Permukaan = 6 × s² = 6 × 36 = 216 unit²
+  </div>
+
+  <script>
+    let angleX = -30;
+    let angleY = 0;
+    let isDragging = false;
+    let isAutoRotating = true;
+    let lastX, lastY;
+    const cube = document.getElementById('cube3D');
+    const scene = document.getElementById('scene');
+
+    function autoRotate() {
+      if (isAutoRotating) {
+        angleY += 0.4;
+        cube.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+      }
+      requestAnimationFrame(autoRotate);
+    }
+
+    autoRotate();
+
+    scene.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      isAutoRotating = false;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    scene.addEventListener('mouseup', () => (isDragging = false));
+    scene.addEventListener('mouseleave', () => (isDragging = false));
+
+    scene.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - lastX;
+      const deltaY = e.clientY - lastY;
+      angleY += deltaX * 0.5;
+      angleX -= deltaY * 0.5;
+      cube.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    function toggleAutoRotate() {
+      isAutoRotating = !isAutoRotating;
+    }
+
+    function updateCube() {
+      const s = parseFloat(document.getElementById('sisi').value);
+      const color = document.getElementById('warna').value;
+      const size = s * 10;
+      const faces = cube.querySelectorAll('.face');
+
+      faces.forEach((face) => {
+        face.style.width = `${size}px`;
+        face.style.height = `${size}px`;
+        face.style.background = `
+          repeating-linear-gradient(${color} 1px, transparent 2px 30px),
+          repeating-linear-gradient(90deg, ${color} 1px, transparent 2px 30px)
+        `;
+        face.style.boxShadow = `0 0 15px ${color}`;
+      });
+
+      cube.querySelector('.front').style.transform = `translateZ(${s * 5}px)`;
+      cube.querySelector('.back').style.transform = `rotateY(180deg) translateZ(${s * 5}px)`;
+      cube.querySelector('.right').style.transform = `rotateY(90deg) translateZ(${s * 5}px)`;
+      cube.querySelector('.left').style.transform = `rotateY(-90deg) translateZ(${s * 5}px)`;
+      cube.querySelector('.top').style.transform = `rotateX(90deg) translateZ(${s * 5}px)`;
+      cube.querySelector('.bottom').style.transform = `rotateX(-90deg) translateZ(${s * 5}px)`;
+
+      // Update UI color
+      document.body.style.color = color;
+      const title = document.querySelector('h1');
+      title.style.color = color;          // Tambahan: ubah warna teks judul juga
+      title.style.textShadow = `0 0 10px ${color}`;
+      document.getElementById('narrationBox').style.boxShadow = `0 0 8px ${color}88`;
+      document.querySelectorAll('input, label, button').forEach((el) => {
+        el.style.color = color;
+        if (el.tagName === 'INPUT' || el.tagName === 'BUTTON') el.style.borderColor = color;
+      });
+
+      // Update narration
+      const volume = s ** 3;
+      const luas = 6 * s * s;
+      document.getElementById('narrationBox').innerHTML = `
+        Volume = s³ = ${s}³ = ${volume} unit³<br />
+        Luas Permukaan = 6 × s² = 6 × ${s * s} = ${luas} unit²
+      `;
+    }
+
+    updateCube();
+  </script>
+</body>
+</html>
